@@ -926,6 +926,54 @@ def get_azuredevops_chart():
             'message': f'Chart generation error: {str(e)}'
         }), 500
 
+@app.route('/api/azuredevops/repositories')
+def get_azuredevops_repositories():
+    """Extract GitHub repositories from Azure DevOps work items for GitHub tab integration"""
+    days = int(request.args.get('days', 30))
+    org = request.args.get('org', azuredevops_analytics.organization)
+    project = request.args.get('project', azuredevops_analytics.project)
+    area_path = request.args.get('area_path', azuredevops_analytics.area_path)
+    
+    if org:
+        azuredevops_analytics.organization = org
+    if project:
+        azuredevops_analytics.project = project
+    if area_path:
+        azuredevops_analytics.area_path = area_path
+    
+    try:
+        # Get streamlined analytics to extract repositories
+        result = azuredevops_analytics.get_streamlined_analytics(days)
+        
+        if result.get('status') == 'success':
+            data = result.get('data', {})
+            involved_repositories = data.get('involved_repositories', [])
+            repository_breakdown = data.get('repository_breakdown', {})
+            
+            # Resolve actual repository names from Azure DevOps
+            print(f"🔍 Resolving {len(involved_repositories)} repository names...")
+            resolved_repos = azuredevops_analytics._get_resolved_repositories(involved_repositories, repository_breakdown)
+            
+            return jsonify({
+                'status': 'success',
+                'repositories': resolved_repos,
+                'total_repositories': len(resolved_repos),
+                'analysis_period': f'{days} days',
+                'resolved_count': len([r for r in resolved_repos if r.get('resolved', False)]),
+                'note': 'Repository names resolved from Azure DevOps repository details'
+            })
+        else:
+            return jsonify({
+                'status': 'error',
+                'message': result.get('message', 'Failed to get Azure DevOps data')
+            }), 500
+            
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': f'Error extracting repositories: {str(e)}'
+        }), 500
+
 # Figma API Routes
 @app.route('/api/figma/analytics')
 def get_figma_analytics():

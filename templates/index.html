@@ -205,6 +205,15 @@
                     </div>
 
                     <div class="metric-selector">
+                        <h6><i class="fas fa-sync-alt"></i> Azure DevOps Integration</h6>
+                        <button class="btn btn-outline-info w-100 mb-2" onclick="syncRepositoriesFromAzureDevOps()">
+                            <i class="fab fa-microsoft"></i> <i class="fas fa-arrow-right"></i> <i class="fab fa-github"></i> 
+                            Sync from Azure DevOps
+                        </button>
+                        <small class="text-muted">Load repositories from Azure DevOps work items</small>
+                    </div>
+
+                    <div class="metric-selector">
                         <h6><i class="fas fa-list"></i> Selected Repositories</h6>
                         <div id="selected-repos" class="mb-2">
                             <small class="text-muted">No repositories selected</small>
@@ -275,8 +284,8 @@
                     <div class="metric-selector">
                         <h6>Time Range</h6>
                         <select class="form-select" id="azuredevops-time-range">
-                            <option value="7" selected>Last 7 days</option>
-                            <option value="30">Last 30 days</option>
+                            <option value="7">Last 7 days</option>
+                            <option value="30" selected>Last 30 days</option>
                             <option value="90">Last 90 days</option>
                         </select>
                     </div>
@@ -1122,6 +1131,97 @@
                 infoElement.textContent = selectedRepos[0];
             } else {
                 infoElement.textContent = `${selectedRepos.length} repositories`;
+            }
+        }
+
+        async function syncRepositoriesFromAzureDevOps() {
+            const button = event.target.closest('button');
+            const originalText = button.innerHTML;
+            
+            try {
+                // Show loading state
+                button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Syncing...';
+                button.disabled = true;
+                
+                // Get Azure DevOps configuration
+                const org = document.getElementById('azuredevops-org').value || azuredevopsOrg;
+                const project = document.getElementById('azuredevops-project').value || azuredevopsProject;
+                const areaPath = document.getElementById('azuredevops-area-path').value || azuredevopsAreaPath;
+                const days = document.getElementById('github-time-range').value || 30;
+                
+                if (!org || !project) {
+                    alert('Please configure Azure DevOps organization and project first in the Azure DevOps tab.');
+                    return;
+                }
+                
+                // Build API URL
+                const params = new URLSearchParams({
+                    days: days,
+                    org: org,
+                    project: project
+                });
+                
+                if (areaPath) {
+                    params.append('area_path', areaPath);
+                }
+                
+                // Fetch repositories from Azure DevOps
+                const response = await fetch(`/api/azuredevops/repositories?${params}`);
+                const result = await response.json();
+                
+                if (result.status === 'success' && result.repositories.length > 0) {
+                    // Clear existing repositories
+                    selectedRepos.length = 0;
+                    
+                    // Add repositories from Azure DevOps
+                    let addedCount = 0;
+                    let resolvedCount = 0;
+                    result.repositories.forEach(repo => {
+                        // Use the actual resolved GitHub repository name
+                        const repoFormat = repo.github_repo;
+                        if (!selectedRepos.includes(repoFormat)) {
+                            selectedRepos.push(repoFormat);
+                            addedCount++;
+                            if (repo.resolved) {
+                                resolvedCount++;
+                            }
+                        }
+                    });
+                    
+                    // Update UI
+                    updateReposList();
+                    updateGitHubRepoInfo();
+                    
+                    // Show success message
+                    button.innerHTML = '<i class="fas fa-check text-success"></i> Synced!';
+                    setTimeout(() => {
+                        button.innerHTML = originalText;
+                        button.disabled = false;
+                    }, 2000);
+                    
+                    // Show info about what was synced
+                    const resolvedMessage = resolvedCount > 0 ? 
+                        `✅ ${resolvedCount} repositories resolved to actual GitHub names\n` : '';
+                    const unresolvedMessage = (addedCount - resolvedCount) > 0 ? 
+                        `⚠️ ${addedCount - resolvedCount} repositories could not be resolved (using fallback names)\n` : '';
+                    
+                    alert(`🔗 Successfully synced ${addedCount} repositories from Azure DevOps!\n\n${resolvedMessage}${unresolvedMessage}\nRepositories added:\n${selectedRepos.join('\n')}`);
+                    
+                } else if (result.repositories && result.repositories.length === 0) {
+                    alert('No GitHub repositories found in Azure DevOps work items for the selected time range and area path.');
+                } else {
+                    alert(`Failed to sync repositories: ${result.message || 'Unknown error'}`);
+                }
+                
+            } catch (error) {
+                console.error('Error syncing repositories:', error);
+                alert(`Error syncing repositories: ${error.message}`);
+            } finally {
+                // Reset button state if not already done
+                if (button.disabled) {
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                }
             }
         }
 
