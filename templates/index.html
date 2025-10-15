@@ -239,8 +239,8 @@
                 </div>
 
                 <!-- Azure DevOps Configuration -->
-                <div id="azuredevops-sidebar" style="display: none;">
-                    <h5><i class="fab fa-microsoft"></i> Azure DevOps Configuration</h5>
+                <div id="azuredevops-sidebar" style="display: block;">  <!-- Show by default since Azure DevOps is active tab -->
+                    <h5><i class="fab fa-microsoft"></i> Azure DevOps Project Setup</h5>
                     
                     <div class="azuredevops-info">
                         <small><strong>Azure DevOps Integration:</strong> Work Items, Pull Requests & Builds</small><br>
@@ -375,18 +375,8 @@
                 <!-- Navigation Tabs -->
                 <ul class="nav nav-tabs mb-4" id="analyticsTabs" role="tablist">
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="datadog-tab" data-bs-toggle="tab" data-bs-target="#datadog-pane" type="button" role="tab">
-                            <i class="fas fa-chart-line"></i> Datadog Metrics
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="datadog-logs-tab" data-bs-toggle="tab" data-bs-target="#datadog-logs-pane" type="button" role="tab">
-                            <i class="fas fa-file-alt"></i> Datadog Logs
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="datadog-dashboards-tab" data-bs-toggle="tab" data-bs-target="#datadog-dashboards-pane" type="button" role="tab">
-                            <i class="fas fa-tachometer-alt"></i> Datadog Dashboards
+                        <button class="nav-link active" id="azuredevops-tab" data-bs-toggle="tab" data-bs-target="#azuredevops-pane" type="button" role="tab">
+                            <i class="fab fa-microsoft"></i> Azure DevOps
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
@@ -395,8 +385,18 @@
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="azuredevops-tab" data-bs-toggle="tab" data-bs-target="#azuredevops-pane" type="button" role="tab">
-                            <i class="fab fa-microsoft"></i> Azure DevOps
+                        <button class="nav-link" id="datadog-dashboards-tab" data-bs-toggle="tab" data-bs-target="#datadog-dashboards-pane" type="button" role="tab">
+                            <i class="fas fa-tachometer-alt"></i> Datadog Dashboards
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="datadog-tab" data-bs-toggle="tab" data-bs-target="#datadog-pane" type="button" role="tab">
+                            <i class="fas fa-chart-line"></i> Datadog Metrics
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="datadog-logs-tab" data-bs-toggle="tab" data-bs-target="#datadog-logs-pane" type="button" role="tab">
+                            <i class="fas fa-file-alt"></i> Datadog Logs
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
@@ -409,7 +409,7 @@
                 <!-- Tab Content -->
                 <div class="tab-content" id="analyticsTabContent">
                     <!-- Datadog Tab -->
-                    <div class="tab-pane fade show active" id="datadog-pane" role="tabpanel">
+                    <div class="tab-pane fade" id="datadog-pane" role="tabpanel">
 
                 <!-- Metrics Summary Cards -->
                 <div class="row mb-4" id="metrics-summary">
@@ -612,7 +612,7 @@
                     </div>
 
                     <!-- Azure DevOps Tab -->
-                    <div class="tab-pane fade" id="azuredevops-pane" role="tabpanel">
+                    <div class="tab-pane fade show active" id="azuredevops-pane" role="tabpanel">
 
                         <!-- Azure DevOps Analytics Summary -->
                         <div class="row mb-4" id="azuredevops-summary">
@@ -829,7 +829,7 @@
             azuredevopsTab.addEventListener('click', function() {
                 datadogSidebar.style.display = 'none';
                 githubSidebar.style.display = 'none';
-                azuredevopsSidebar.style.display = 'block';
+                azuredevopsSidebar.style.display = 'block';  // Show Azure DevOps sidebar
                 figmaSidebar.style.display = 'none';
             });
             
@@ -839,6 +839,12 @@
                 azuredevopsSidebar.style.display = 'none';
                 figmaSidebar.style.display = 'block';
             });
+            
+            // Show Azure DevOps sidebar by default since it's the active tab
+            azuredevopsSidebar.style.display = 'block';
+            datadogSidebar.style.display = 'none';
+            githubSidebar.style.display = 'none';
+            figmaSidebar.style.display = 'none';
         });
 
         async function loadAvailableMetrics() {

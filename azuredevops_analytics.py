@@ -1069,7 +1069,7 @@ class AzureDevOpsAnalytics:
             )
         
         return json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
-    
+
     def _create_empty_chart(self, message):
         """Create an empty chart with a message"""
         fig = go.Figure()

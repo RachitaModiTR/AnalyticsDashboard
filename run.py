@@ -25,11 +25,26 @@ def main():
         print(f"🌐 Datadog Site: {Config.DD_SITE}")
         print("\nPress Ctrl+C to stop the server")
         
-        app.run(
-            debug=Config.FLASK_DEBUG,
-            host='0.0.0.0',
-            port=5002  # Changed from 5001 to avoid port conflict
-        )
+        try:
+            # Try port 5002 first, then 5003 if occupied
+            port = 5002
+            app.run(
+                debug=Config.FLASK_DEBUG,
+                host='0.0.0.0',
+                port=port
+            )
+        except OSError as port_error:
+            if "Address already in use" in str(port_error):
+                print(f"Port {port} is in use, trying port 5003...")
+                port = 5003
+                print(f"📊 Dashboard will be available at: http://localhost:{port}")
+                app.run(
+                    debug=Config.FLASK_DEBUG,
+                    host='0.0.0.0',
+                    port=port
+                )
+            else:
+                raise port_error
         
     except ValueError as e:
         print(f"❌ Configuration error: {e}")
