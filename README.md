@@ -1,30 +1,50 @@
-# Datadog Analytics Dashboard (Client Token Version)
+# Multi-Platform Analytics Dashboard
 
-A Python Flask application that connects to your Datadog account using client tokens to create custom analytics and dashboards.
+**AI Nexus Hackathon 2025** 🏆
 
-## Features
+A comprehensive Python Flask application that provides analytics dashboards for multiple platforms including Datadog, GitHub, Azure DevOps, and Figma.
 
-- 🔗 **Client Token Authentication**: Connect to your Datadog account using client tokens (no API keys required)
-- 📊 **Interactive Dashboards**: Create custom dashboards with real-time metrics
-- 📈 **Multiple Chart Types**: Line charts, bar charts, and more
-- ⏰ **Flexible Time Ranges**: View data from 1 hour to 7 days
-- 🎯 **Metric Selection**: Choose from available Datadog metrics or add custom ones
-- 📱 **Responsive Design**: Works on desktop and mobile devices
-- 🔄 **Auto-refresh**: Automatic dashboard updates every 5 minutes
-- ➕ **Custom Metrics**: Add your own metric names to the dashboard
+## 🚀 Features
 
-## Prerequisites
+### 📊 **Multi-Platform Integration**
+- **Datadog Analytics**: Metrics, logs, and dashboard integration
+- **GitHub Analytics**: Multi-repository PR analysis with summary tables  
+- **Azure DevOps Analytics**: Work items, PRs, and repository tracking
+- **Figma Analytics**: Design file and team collaboration metrics
+
+### ⚡ **Performance Optimizations**
+- **97% faster loading** for Azure DevOps (1.4s vs 1+ min)
+- **Fast Mode**: Quick analysis (1-2 seconds)
+- **Detailed Mode**: Comprehensive analysis (1 minute)
+- **Smart caching** and optimized queries
+
+### 📈 **Advanced Analytics**
+- **6 Chart Types**: Overview, by Type, State, Assignee, PR Status, Repository Breakdown
+- **Interactive Plotly Charts**: Professional visualizations
+- **Real-time Data**: Live updates from all platforms
+- **Multi-repository Support**: Analyze across multiple GitHub repos
+
+### 🎨 **Modern UI/UX**
+- **Bootstrap 5**: Responsive, modern design
+- **Loading Indicators**: Smart progress feedback
+- **Error Handling**: Graceful failure management
+- **Mobile Friendly**: Works on all devices
+
+## 🛠️ Prerequisites
 
 - Python 3.7 or higher
-- Datadog account with client token access
-- pip (Python package installer)
+- API access to desired platforms:
+  - Datadog account with API/Application keys
+  - GitHub Personal Access Token
+  - Azure DevOps Personal Access Token
+  - Figma Personal Access Token (optional)
 
-## Installation
+## 📦 Installation
 
-1. **Clone or download this project**
+1. **Clone the repository**
    ```bash
-   git clone <your-repo-url>
-   cd datadog-analytics-app
+   git clone https://github.com/RachitaModiTR/AnalyticsDashboard.git
+   cd AnalyticsDashboard
    ```
 
 2. **Install dependencies**
@@ -37,24 +57,28 @@ A Python Flask application that connects to your Datadog account using client to
    cp .env.example .env
    ```
    
-   Edit `.env` file with your Datadog client token:
-   ```
-   DD_CLIENT_TOKEN=your_datadog_client_token_here
+   Edit `.env` file with your API tokens:
+   ```env
+   # Datadog Configuration
+   DD_API_KEY=your_datadog_api_key
+   DD_APPLICATION_KEY=your_datadog_app_key
    DD_SITE=datadoghq.com
-   SECRET_KEY=your_secret_key_here
+   
+   # GitHub Configuration  
+   GITHUB_TOKEN=your_github_token
+   
+   # Azure DevOps Configuration
+   AZURE_DEVOPS_PAT=your_azure_devops_token
+   
+   # Figma Configuration (Optional)
+   FIGMA_TOKEN=your_figma_token
+   
+   # Flask Configuration
+   SECRET_KEY=your_secret_key
+   FLASK_ENV=development
    ```
 
-## Getting Datadog Client Token
-
-1. Log in to your Datadog account
-2. Go to **Integrations** → **APIs**
-3. Create a new **Client Token**:
-   - Client tokens are used for browser-based applications
-   - They have limited permissions compared to API keys
-   - They're perfect for read-only operations like viewing metrics
-4. Copy the client token to your `.env` file
-
-## Usage
+## 🚀 Usage
 
 1. **Start the application**
    ```bash
@@ -62,159 +86,154 @@ A Python Flask application that connects to your Datadog account using client to
    ```
 
 2. **Open your browser**
-   Navigate to `http://localhost:5000`
+   Navigate to `http://localhost:5002`
 
-3. **Configure your dashboard**
-   - Select metrics from the sidebar
-   - Add custom metrics using the "Custom Metric" field
-   - Choose time range (1 hour to 7 days)
-   - Select chart type (line or bar)
-   - Click "Update Dashboard"
+3. **Configure each platform**
+   - **Datadog**: Automatically configured via environment variables
+   - **GitHub**: Add repositories dynamically in the UI
+   - **Azure DevOps**: Configure organization, project, and area path
+   - **Figma**: Set team ID in configuration
 
-## Available Metrics
+## 🎯 Azure DevOps Features
 
-The application supports common Datadog metrics including:
-- `system.cpu.user` - CPU usage
-- `system.mem.used` - Memory usage
-- `system.disk.used` - Disk usage
-- `system.load.1` - System load
-- `aws.ec2.cpuutilization` - AWS EC2 CPU utilization
-- `docker.cpu.usage` - Docker container CPU usage
-- `docker.mem.usage` - Docker container memory usage
+### **Performance Modes**
+- **🚀 Fast Mode**: Work items analysis (1-2 seconds)
+- **🔍 Detailed Mode**: Full PR/repository analysis (~1 minute)
 
-### Adding Custom Metrics
+### **Chart Types**
+- **📊 Activity Overview**: Work Items, PRs, Repositories
+- **🏷️ Work Items by Type**: Bug, Task, User Story breakdown
+- **📋 Work Items by State**: Active, Resolved, Closed status
+- **👤 Work Items by Assignee**: Workload distribution
+- **🔀 Pull Requests by Status**: PR status analysis
+- **📁 Repository Breakdown**: PRs/commits by repository
 
-You can add any metric name that exists in your Datadog account:
-1. Enter the metric name in the "Custom Metric" field
-2. Click "Add Metric"
-3. The metric will be added to your dashboard
+### **Smart Filtering**
+- **Area Path Filtering**: Focus on specific project areas
+- **Date Range Selection**: 7, 30, or 90 days
+- **Dynamic Configuration**: Organization/project selection
 
-## API Endpoints
+## 🐙 GitHub Features
 
-- `GET /` - Main dashboard page
-- `GET /api/metrics` - List available metrics
-- `GET /api/metrics/<metric_name>` - Get specific metric data
-- `GET /api/analytics` - Get analytics summary
-- `GET /api/charts/<metric_name>` - Get chart data for a metric
-- `GET /api/dashboard/<dashboard_id>` - Get dashboard data (if dashboard ID is known)
+### **Multi-Repository Support**
+- Add/remove repositories dynamically
+- Cross-repository PR analysis
+- Repository summary tables
+- Comprehensive analytics across multiple repos
 
-## Configuration
+### **Analytics**
+- Pull request metrics and trends
+- Repository activity comparison
+- Developer contribution analysis
+- Time-based filtering
 
-### Environment Variables
+## 📊 API Endpoints
 
-| Variable | Description | Default | Required |
-|----------|-------------|---------|----------|
-| `DD_CLIENT_TOKEN` | Datadog client token | - | ✅ **Yes** |
-| `DD_SITE` | Datadog site (datadoghq.com, datadoghq.eu, etc.) | datadoghq.com | No |
-| `DD_APPLICATION_ID` | Datadog application ID (for RUM features) | - | ❌ **No** |
-| `SECRET_KEY` | Flask secret key | dev-secret-key | No |
-| `FLASK_ENV` | Flask environment | development | No |
-| `FLASK_DEBUG` | Enable debug mode | True | No |
+### **Datadog**
+- `GET /api/datadog/analytics` - Datadog metrics summary
+- `GET /api/datadog/charts/<metric>` - Chart data for specific metric
 
-### Getting DD_APPLICATION_ID (Optional)
+### **GitHub** 
+- `GET /api/github/prs` - Pull request analytics
+- `GET /api/github/prs/chart` - PR chart data
 
-The `DD_APPLICATION_ID` is **only needed if you want RUM (Real User Monitoring) features**. For basic analytics dashboards, you don't need it.
+### **Azure DevOps**
+- `GET /api/azuredevops/analytics` - Fast analytics
+- `GET /api/azuredevops/analytics-detailed` - Detailed analytics
+- `GET /api/azuredevops/chart` - Chart data
+- `GET /api/azuredevops/workitems` - Work items data
 
-**To get it (if needed):**
-1. Go to **UX Monitoring** → **RUM Applications**
-2. Create a new **Browser Application**
-3. Copy the **Application ID** from the setup code
+### **Figma**
+- `GET /api/figma/analytics` - Figma team analytics
 
-**For this analytics dashboard, you can skip this step entirely.**
+## ⚙️ Configuration Options
 
-### Customization
+### **Environment Variables**
 
-You can customize the application by:
-- Adding new metrics in the HTML template
-- Modifying the dashboard layout in `templates/index.html`
-- Adding new chart types in the chart generation code
-- Extending the analytics calculations
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `DD_API_KEY` | Datadog API key | ✅ |
+| `DD_APPLICATION_KEY` | Datadog application key | ✅ |
+| `GITHUB_TOKEN` | GitHub personal access token | ❌ |
+| `AZURE_DEVOPS_PAT` | Azure DevOps personal access token | ❌ |
+| `FIGMA_TOKEN` | Figma personal access token | ❌ |
 
-## Troubleshooting
+### **Dynamic Configuration**
+- GitHub repositories: Configure via UI
+- Azure DevOps: Organization/project/area path via UI
+- Time ranges: Selectable in dashboard
+- Chart types: Multiple visualization options
 
-### Common Issues
+## 🔧 Technical Architecture
 
-1. **"Failed to fetch metric data"**
-   - Check your client token is correct
-   - Verify the metric name exists in your Datadog account
-   - Ensure your Datadog account has data for the selected time range
-   - Client tokens have limited permissions - some metrics might not be accessible
+### **Backend**
+- **Flask**: Web framework
+- **Plotly**: Interactive charts
+- **Requests**: API integrations
+- **Python-dotenv**: Environment management
 
-2. **"No data available for chart"**
-   - The metric might not have data for the selected time range
-   - Try selecting a different time range
-   - Check if the metric is actively being collected
-   - Verify the metric name is correct (case-sensitive)
+### **Frontend**
+- **Bootstrap 5**: UI framework
+- **JavaScript**: Dynamic interactions
+- **Plotly.js**: Chart rendering
+- **Responsive Design**: Mobile-first approach
 
-3. **Connection errors**
-   - Verify your internet connection
-   - Check if your Datadog site URL is correct
-   - Ensure your client token is valid and not expired
+### **Performance Optimizations**
+- **Streamlined Analytics**: Fast work item retrieval
+- **Batch Processing**: Efficient API calls
+- **Smart Caching**: Reduced redundant requests
+- **Conditional Loading**: Load data only when needed
 
-4. **Authentication errors**
-   - Client tokens are different from API keys
-   - Make sure you're using a client token, not an API key
-   - Client tokens have limited scope - they can only read certain data
+## 🚨 Troubleshooting
 
-### Debug Mode
+### **Common Issues**
 
-Enable debug mode by setting `FLASK_DEBUG=True` in your `.env` file to see detailed error messages.
+1. **Authentication Errors**
+   - Verify API tokens are correct and active
+   - Check token permissions and scopes
+   - Ensure environment variables are loaded
 
-## Client Token vs API Key
+2. **Performance Issues**
+   - Use Fast Mode for quick analysis
+   - Reduce time range for faster loading
+   - Check network connectivity
 
-| Feature | Client Token | API Key |
-|---------|--------------|---------|
-| **Authentication** | Browser-based | Server-based |
-| **Permissions** | Limited (read-only) | Full access |
-| **Use Case** | Frontend applications | Backend applications |
-| **Security** | Less sensitive | More sensitive |
-| **Access** | Public metrics | All metrics and operations |
+3. **Data Not Loading**
+   - Verify API endpoints are accessible
+   - Check organization/project names
+   - Ensure area paths are correct
 
-## Production Deployment
+4. **Chart Display Issues**
+   - Check browser console for JavaScript errors
+   - Verify Plotly.js is loading correctly
+   - Try refreshing the page
 
-For production deployment:
+## 🌟 Performance Highlights
 
-1. **Set production environment variables**
-   ```
-   FLASK_ENV=production
-   FLASK_DEBUG=False
-   SECRET_KEY=your-secure-secret-key
-   ```
+- **Azure DevOps**: 97% performance improvement
+- **GitHub**: Multi-repo analysis in seconds
+- **Datadog**: Real-time metrics display
+- **UI**: Responsive design with smart loading
 
-2. **Use a production WSGI server**
-   ```bash
-   gunicorn -w 4 -b 0.0.0.0:5000 app:app
-   ```
-
-3. **Set up reverse proxy** (nginx, Apache, etc.)
-
-4. **Enable HTTPS** for secure connections
-
-## Contributing
+## 🤝 Contributing
 
 1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-## License
+## 📄 License
 
 This project is open source and available under the MIT License.
 
-## Support
+## 🏆 AI Nexus Hackathon 2025
+
+This project was developed for the AI Nexus Hackathon 2025, showcasing advanced analytics capabilities across multiple platforms with performance optimizations and modern UI/UX design.
+
+## 📞 Support
 
 For issues and questions:
+- Open an issue in this repository
 - Check the troubleshooting section above
-- Review Datadog client token documentation
-- Open an issue in the project repository
-
-## Changelog
-
-### Version 2.0 (Client Token Support)
-- ✅ Added client token authentication
-- ✅ Removed dependency on API keys
-- ✅ Added custom metric input
-- ✅ Improved error handling
-- ✅ Updated UI to show authentication method
-- ✅ Made DD_APPLICATION_ID optional
+- Review platform-specific API documentation
