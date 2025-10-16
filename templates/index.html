@@ -965,6 +965,69 @@
                         <i class="fas fa-sync"></i> Update Figma Analytics
                     </button>
                 </div>
+
+                <!-- Datadog Configuration -->
+                <div id="datadog-sidebar" style="display: none;">
+                    <h5><i class="fas fa-chart-line"></i> Datadog Configuration</h5>
+                    
+                    <div class="datadog-info">
+                        <small><strong>Datadog Integration:</strong> Logs, Metrics & Monitoring</small><br>
+                        <small><strong>Site:</strong> <span id="datadog-site-info">datadoghq.com</span></small><br>
+                        <small><strong>Status:</strong> <span id="datadog-status-info">Ready</span></small>
+                    </div>
+
+                    <div class="metric-selector">
+                        <h6><i class="fas fa-cog"></i> Log Configuration</h6>
+                        <div class="row">
+                            <div class="col-12">
+                                <label for="datadog-time-range" class="form-label">Time Range</label>
+                                <select class="form-select" id="datadog-time-range">
+                                    <option value="1">Last 1 hour</option>
+                                    <option value="6">Last 6 hours</option>
+                                    <option value="24" selected>Last 24 hours</option>
+                                    <option value="72">Last 3 days</option>
+                                    <option value="168">Last 7 days</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="metric-selector">
+                        <h6>Service Filter</h6>
+                        <select class="form-select" id="datadog-service-filter">
+                            <option value="">All Services</option>
+                            <option value="ultrataxapiservices">UltraTax API Services</option>
+                            <option value="ultrataxclientservices">UltraTax Client Services</option>
+                            <option value="taxassistantservices">Tax Assistant Services</option>
+                        </select>
+                    </div>
+
+                    <div class="metric-selector">
+                        <h6>Log Level Filter</h6>
+                        <select class="form-select" id="datadog-level-filter">
+                            <option value="">All Levels</option>
+                            <option value="ERROR">ERROR</option>
+                            <option value="WARN">WARN</option>
+                            <option value="INFO">INFO</option>
+                            <option value="DEBUG">DEBUG</option>
+                            <option value="TRACE">TRACE</option>
+                        </select>
+                    </div>
+
+                    <div class="metric-selector">
+                        <h6>Log Limit</h6>
+                        <select class="form-select" id="datadog-limit-filter">
+                            <option value="50">50 logs</option>
+                            <option value="100" selected>100 logs</option>
+                            <option value="500">500 logs</option>
+                            <option value="1000">1000 logs</option>
+                        </select>
+                    </div>
+
+                    <button class="btn btn-primary w-100" onclick="searchDatadogLogs()">
+                        <i class="fas fa-search"></i> Search Logs
+                    </button>
+                </div>
             </div>
 
             <!-- Main Content -->
@@ -1202,52 +1265,45 @@
                         <div class="datadog-search-container">
                             <h5><i class="fas fa-search"></i> Log Search</h5>
                             <div class="row">
-                                <div class="col-md-3">
+                                <div class="col-md-10">
                                     <label for="datadog-query" class="form-label">Search Query</label>
-                                    <input type="text" class="form-control" id="datadog-query" placeholder="*" value="*">
+                                    <input type="text" class="form-control" id="datadog-query" placeholder="Enter your search query (e.g., * for all logs, error, warning, etc.)" value="*">
+                                    <small class="form-text text-muted">Use the sidebar configuration to set filters for service, level, time range, and limit.</small>
                                 </div>
-                                <div class="col-md-2">
-                                    <label for="datadog-service" class="form-label">Service</label>
-                                    <select class="form-select" id="datadog-service">
-                                        <option value="">All Services</option>
-                                        <!-- Services will be populated dynamically -->
-                                    </select>
-                                </div>
-                                <div class="col-md-2">
-                                    <label for="datadog-level" class="form-label">Level</label>
-                                    <select class="form-select" id="datadog-level">
-                                        <option value="">All Levels</option>
-                                        <option value="ERROR">ERROR</option>
-                                        <option value="WARN">WARN</option>
-                                        <option value="INFO">INFO</option>
-                                        <option value="DEBUG">DEBUG</option>
-                                        <option value="TRACE">TRACE</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-2">
-                                    <label for="datadog-hours" class="form-label">Hours Back</label>
-                                    <select class="form-select" id="datadog-hours">
-                                        <option value="1">1 hour</option>
-                                        <option value="6">6 hours</option>
-                                        <option value="24" selected>24 hours</option>
-                                        <option value="72">3 days</option>
-                                        <option value="168">7 days</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-2">
-                                    <label for="datadog-limit" class="form-label">Limit</label>
-                                    <select class="form-select" id="datadog-limit">
-                                        <option value="50">50</option>
-                                        <option value="100" selected>100</option>
-                                        <option value="500">500</option>
-                                        <option value="1000">1000</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-1 d-flex align-items-end">
-                                    <button class="btn btn-primary" onclick="searchDatadogLogs()">
-                                        <i class="fas fa-search"></i>
+                                <div class="col-md-2 d-flex align-items-end">
+                                    <button class="btn btn-primary w-100" onclick="searchDatadogLogs()">
+                                        <i class="fas fa-search"></i> Search Logs
                                     </button>
                                 </div>
+                            </div>
+                            
+                            <!-- Hidden filter elements for JavaScript functionality -->
+                            <div style="display: none;">
+                                <select id="datadog-service">
+                                    <option value="">All Services</option>
+                                    <!-- Services will be populated dynamically -->
+                                </select>
+                                <select id="datadog-level">
+                                    <option value="">All Levels</option>
+                                    <option value="ERROR">ERROR</option>
+                                    <option value="WARN">WARN</option>
+                                    <option value="INFO">INFO</option>
+                                    <option value="DEBUG">DEBUG</option>
+                                    <option value="TRACE">TRACE</option>
+                                </select>
+                                <select id="datadog-hours">
+                                    <option value="1">1 hour</option>
+                                    <option value="6">6 hours</option>
+                                    <option value="24" selected>24 hours</option>
+                                    <option value="72">3 days</option>
+                                    <option value="168">7 days</option>
+                                </select>
+                                <select id="datadog-limit">
+                                    <option value="50">50</option>
+                                    <option value="100" selected>100</option>
+                                    <option value="500">500</option>
+                                    <option value="1000">1000</option>
+                                </select>
                             </div>
                         </div>
 
@@ -1567,7 +1623,6 @@
             }, 500);
             
             // Handle tab switching
-            const datadogTab = document.getElementById('datadog-tab');
             const datadogLogsTab = document.getElementById('datadog-logs-tab');
             const githubTab = document.getElementById('github-tab');
             const azuredevopsTab = document.getElementById('azuredevops-tab');
@@ -1577,15 +1632,8 @@
             const azuredevopsSidebar = document.getElementById('azuredevops-sidebar');
             const figmaSidebar = document.getElementById('figma-sidebar');
             
-            datadogTab.addEventListener('click', function() {
-                datadogSidebar.style.display = 'block';
-                githubSidebar.style.display = 'none';
-                azuredevopsSidebar.style.display = 'none';
-                figmaSidebar.style.display = 'none';
-            });
-            
             datadogLogsTab.addEventListener('click', function() {
-                datadogSidebar.style.display = 'none';
+                datadogSidebar.style.display = 'block';
                 githubSidebar.style.display = 'none';
                 azuredevopsSidebar.style.display = 'none';
                 figmaSidebar.style.display = 'none';
@@ -1618,21 +1666,66 @@
             githubSidebar.style.display = 'none';
             figmaSidebar.style.display = 'none';
             
-            const chatbotTab = document.getElementById('chatbot-tab');
-            chatbotTab.addEventListener('click', function() {
-                datadogSidebar.style.display = 'none';
-                githubSidebar.style.display = 'none';
-                azuredevopsSidebar.style.display = 'none';
-                figmaSidebar.style.display = 'none';
-                // Initialize chatbot when tab is opened
-                initializeChatbot();
-            });
+            // Sync sidebar controls with main Datadog section
+            const sidebarTimeRange = document.getElementById('datadog-time-range');
+            const sidebarServiceFilter = document.getElementById('datadog-service-filter');
+            const sidebarLevelFilter = document.getElementById('datadog-level-filter');
+            const sidebarLimitFilter = document.getElementById('datadog-limit-filter');
             
-            // Show Azure DevOps sidebar by default since it's the active tab
-            azuredevopsSidebar.style.display = 'block';
-            datadogSidebar.style.display = 'none';
-            githubSidebar.style.display = 'none';
-            figmaSidebar.style.display = 'none';
+            const mainTimeRange = document.getElementById('datadog-hours');
+            const mainServiceFilter = document.getElementById('datadog-service');
+            const mainLevelFilter = document.getElementById('datadog-level');
+            const mainLimitFilter = document.getElementById('datadog-limit');
+            
+            // Sync sidebar to main when sidebar changes
+            if (sidebarTimeRange && mainTimeRange) {
+                sidebarTimeRange.addEventListener('change', function() {
+                    mainTimeRange.value = this.value;
+                });
+            }
+            
+            if (sidebarServiceFilter && mainServiceFilter) {
+                sidebarServiceFilter.addEventListener('change', function() {
+                    mainServiceFilter.value = this.value;
+                });
+            }
+            
+            if (sidebarLevelFilter && mainLevelFilter) {
+                sidebarLevelFilter.addEventListener('change', function() {
+                    mainLevelFilter.value = this.value;
+                });
+            }
+            
+            if (sidebarLimitFilter && mainLimitFilter) {
+                sidebarLimitFilter.addEventListener('change', function() {
+                    mainLimitFilter.value = this.value;
+                });
+            }
+            
+            // Sync main to sidebar when main changes
+            if (mainTimeRange && sidebarTimeRange) {
+                mainTimeRange.addEventListener('change', function() {
+                    sidebarTimeRange.value = this.value;
+                });
+            }
+            
+            if (mainServiceFilter && sidebarServiceFilter) {
+                mainServiceFilter.addEventListener('change', function() {
+                    sidebarServiceFilter.value = this.value;
+                });
+            }
+            
+            if (mainLevelFilter && sidebarLevelFilter) {
+                mainLevelFilter.addEventListener('change', function() {
+                    sidebarLevelFilter.value = this.value;
+                });
+            }
+            
+            if (mainLimitFilter && sidebarLimitFilter) {
+                mainLimitFilter.addEventListener('change', function() {
+                    sidebarLimitFilter.value = this.value;
+                });
+            }
         });
 
         async function loadAvailableMetrics() {
