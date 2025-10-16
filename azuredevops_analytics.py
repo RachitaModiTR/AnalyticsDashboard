@@ -577,7 +577,7 @@ class AzureDevOpsAnalytics:
         """Fetch pull requests from work item relations (GitHub PRs via VSTFS)"""
         if not self.pat_token or not self.organization or not self.project:
             return None
-        
+            
         print(f"🔀 ENHANCED: Getting PRs from work item relations instead of direct Git API")
         
         try:
@@ -844,12 +844,14 @@ class AzureDevOpsAnalytics:
                 'involved_repositories': [],
                 'work_items_with_prs': 0
             }
-
+            
+            
+            # Initialize repository and PR tracking
+            all_repositories = set()
+            all_prs = []
             
             # Analyze work items and conditionally extract PR information
             if work_items:
-                all_repositories = set()
-                all_prs = []
                 
                 for item in work_items:
                     fields = item.get('fields', {})
@@ -886,7 +888,15 @@ class AzureDevOpsAnalytics:
                                     'relation_type': pr.get('relation_type', '')
                                 })
                                 # Add repository to set (prefer full repo path for GitHub)
-                                repo_identifier = pr.get('full_repo_path', '') or pr.get('repository', '')
+                                repo_identifier = pr.get('full_repo_path', '')
+                                if not repo_identifier:
+                                    # Handle repository object structure
+                                    repo_obj = pr.get('repository', {})
+                                    if isinstance(repo_obj, dict):
+                                        repo_identifier = repo_obj.get('name', '') or repo_obj.get('url', '')
+                                    else:
+                                        repo_identifier = str(repo_obj) if repo_obj else ''
+                                
                                 if repo_identifier and repo_identifier != pr.get('url', ''):
                                     all_repositories.add(repo_identifier)
                     # Note: If PR analysis disabled, work item still counted but no PR data extracted
@@ -918,6 +928,19 @@ class AzureDevOpsAnalytics:
                 for pr in pull_requests:
                     status = pr.get('status', 'Unknown')
                     analytics['prs_by_status'][status] = analytics['prs_by_status'].get(status, 0) + 1
+                    
+                    # Extract repository information from pull requests
+                    repo_identifier = pr.get('full_repo_path', '')
+                    if not repo_identifier:
+                        # Handle repository object structure
+                        repo_obj = pr.get('repository', {})
+                        if isinstance(repo_obj, dict):
+                            repo_identifier = repo_obj.get('name', '') or repo_obj.get('url', '')
+                        else:
+                            repo_identifier = str(repo_obj) if repo_obj else ''
+                    
+                    if repo_identifier and repo_identifier != pr.get('url', ''):
+                        all_repositories.add(repo_identifier)
                 
                 # Get recent PRs (limit to 10 for display)
                 analytics['recent_pull_requests'] = pull_requests[:10]
@@ -1254,6 +1277,90 @@ class AzureDevOpsAnalytics:
         
         return resolved_repos
 
+    def _get_work_items_fast(self, days=30):
+        """
+        Fast work items retrieval without PR relations - use the same successful method as get_work_items
+        """
+        print(f"📋 FAST MODE: Delegating to proven get_work_items method...")
+        
+        # Just use the existing working method but return only basic data
+        work_items = self.get_work_items(days=days)
+        
+        if work_items:
+            print(f"✅ FAST MODE: Successfully got {len(work_items)} work items")
+            return work_items
+        else:
+            print(f"❌ FAST MODE: No work items returned from get_work_items")
+            return []
+
+    def get_workitems_only_summary(self, days=30):
+        """
+        Get work items summary without PR analysis for fast initial loading
+        """
+        print(f"🚀 Getting work items only summary for {days} days...")
+        
+        try:
+            # Get work items without PR relations
+            work_items = self._get_work_items_fast(days)
+            if not work_items:
+                return {
+                    'status': 'error',
+                    'message': 'No work items found'
+                }
+            
+            # Analyze work items data
+            total_work_items = len(work_items)
+            work_items_by_type = {}
+            work_items_by_state = {}
+            work_items_by_assignee = {}
+            recent_work_items = []
+            
+            # Sort work items by changed date for recent items
+            sorted_work_items = sorted(work_items, 
+                                     key=lambda x: x.get('fields', {}).get('System.ChangedDate', ''), 
+                                     reverse=True)
+            
+            for item in work_items:
+                fields = item.get('fields', {})
+                
+                # Count by type
+                work_item_type = fields.get('System.WorkItemType', 'Unknown')
+                work_items_by_type[work_item_type] = work_items_by_type.get(work_item_type, 0) + 1
+                
+                # Count by state
+                state = fields.get('System.State', 'Unknown')
+                work_items_by_state[state] = work_items_by_state.get(state, 0) + 1
+                
+                # Count by assignee
+                assignee = fields.get('System.AssignedTo', {}).get('displayName', 'Unassigned')
+                work_items_by_assignee[assignee] = work_items_by_assignee.get(assignee, 0) + 1
+            
+            # Get recent items based on changed date (limit to 10)
+            recent_work_items = sorted_work_items[:10]
+            
+            return {
+                'status': 'success',
+                'data': {
+                    'total_work_items': total_work_items,
+                    'total_pull_requests': 0,  # Will be updated later
+                    'total_commits': 0,  # Will be updated later
+                    'total_repositories': 0,  # Will be updated later
+                    'work_items_by_type': work_items_by_type,
+                    'work_items_by_state': work_items_by_state,
+                    'work_items_by_assignee': work_items_by_assignee,
+                    'recent_work_items': recent_work_items,
+                    'recent_pull_requests': [],  # Will be populated later
+                    'pr_loading': True  # Indicates PR data is still loading
+                }
+            }
+            
+        except Exception as e:
+            print(f"❌ Error in get_workitems_only_summary: {str(e)}")
+            return {
+                'status': 'error',
+                'message': f'Error getting work items summary: {str(e)}'
+            }
+
     def get_streamlined_analytics(self, days=7):
         """
         Streamlined analytics flow for better performance:
@@ -1362,7 +1469,15 @@ class AzureDevOpsAnalytics:
                         })
                     
                     # Track repositories
-                    repo = pr.get('full_repo_path', '') or pr.get('repository', '')
+                    repo = pr.get('full_repo_path', '')
+                    if not repo:
+                        # Handle repository object structure
+                        repo_obj = pr.get('repository', {})
+                        if isinstance(repo_obj, dict):
+                            repo = repo_obj.get('name', '') or repo_obj.get('url', '')
+                        else:
+                            repo = str(repo_obj) if repo_obj else ''
+                    
                     if repo:
                         repositories.add(repo)
             
@@ -1370,6 +1485,9 @@ class AzureDevOpsAnalytics:
             repository_breakdown = {}
             for pr in all_prs:
                 repo = pr.get('repository', 'Unknown')
+                # Handle repository object structure
+                if isinstance(repo, dict):
+                    repo = repo.get('name', 'Unknown')
                 repository_breakdown[repo] = repository_breakdown.get(repo, 0) + 1
             
             # Sort recent items (limit to 10 for display)

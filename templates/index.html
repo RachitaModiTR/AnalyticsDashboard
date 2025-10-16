@@ -3,76 +3,420 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Analytics Dashboard - Datadog & GitHub</title>
+    <title>Thomson Reuters Analytics Dashboard</title>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
+        /* Thomson Reuters Brand Colors */
+        :root {
+            --tr-orange: #FF6200;
+            --tr-dark-blue: #0F1419;
+            --tr-light-blue: #0073E6;
+            --tr-gray-dark: #2C2C2C;
+            --tr-gray-medium: #5A5A5A;
+            --tr-gray-light: #F5F5F5;
+            --tr-white: #FFFFFF;
+            --tr-success: #00A651;
+            --tr-warning: #FFB81C;
+            --tr-danger: #E31837;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--tr-gray-light);
+        }
+        
         .metric-card {
-            transition: transform 0.2s;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            background: var(--tr-white);
+            border: 1px solid #E0E0E0;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(15, 20, 25, 0.1);
         }
+        
         .metric-card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(15, 20, 25, 0.15);
+            border-color: var(--tr-orange);
         }
+        
+        .metric-card .card-title {
+            color: var(--tr-orange);
+            font-weight: 700;
+            font-size: 2rem;
+        }
+        
+        .metric-card .card-text {
+            color: var(--tr-gray-medium);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.5px;
+        }
+        
         .chart-container {
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            padding: 20px;
-            margin-bottom: 20px;
+            background: var(--tr-white);
+            border-radius: 8px;
+            box-shadow: 0 2px 12px rgba(15, 20, 25, 0.08);
+            padding: 24px;
+            margin-bottom: 24px;
+            border: 1px solid #E0E0E0;
         }
+        
         .navbar-brand {
-            font-weight: bold;
+            font-weight: 700;
+            color: var(--tr-white) !important;
         }
+        
+        .navbar {
+            background: linear-gradient(135deg, var(--tr-dark-blue) 0%, var(--tr-gray-dark) 100%) !important;
+            box-shadow: 0 2px 12px rgba(15, 20, 25, 0.15);
+        }
+        
         .sidebar {
-            background: #f8f9fa;
+            background: linear-gradient(180deg, var(--tr-white) 0%, #FAFAFA 100%);
             min-height: 100vh;
-            padding: 20px;
+            padding: 24px;
+            border-right: 1px solid #E0E0E0;
         }
+        
+        .sidebar h5 {
+            color: var(--tr-dark-blue);
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--tr-orange);
+        }
+        
         .main-content {
-            padding: 20px;
+            padding: 24px;
+            background: var(--tr-gray-light);
         }
+        
         .metric-selector {
-            background: white;
-            border-radius: 10px;
+            background: var(--tr-white);
+            border-radius: 8px;
             padding: 20px;
             margin-bottom: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 8px rgba(15, 20, 25, 0.06);
+            border: 1px solid #E0E0E0;
+            transition: all 0.3s ease;
         }
+        
+        .metric-selector:hover {
+            box-shadow: 0 4px 16px rgba(15, 20, 25, 0.1);
+            border-color: var(--tr-orange);
+        }
+        
+        .metric-selector h6 {
+            color: var(--tr-dark-blue);
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+        
         .client-token-info {
-            background: #e3f2fd;
-            border-left: 4px solid #2196f3;
-            padding: 10px;
+            background: linear-gradient(135deg, #E6F3FF 0%, #F0F8FF 100%);
+            border-left: 4px solid var(--tr-light-blue);
+            padding: 16px;
             margin-bottom: 20px;
-            border-radius: 4px;
+            border-radius: 6px;
+            color: var(--tr-dark-blue);
         }
+        
         .github-info {
-            background: #f3e5f5;
-            border-left: 4px solid #9c27b0;
-            padding: 10px;
+            background: linear-gradient(135deg, #F5F5F5 0%, #FAFAFA 100%);
+            border-left: 4px solid var(--tr-gray-dark);
+            padding: 16px;
             margin-bottom: 20px;
-            border-radius: 4px;
+            border-radius: 6px;
+            color: var(--tr-dark-blue);
         }
+        
         .azuredevops-info {
-            background: #e3f2fd;
-            border-left: 4px solid #0078d4;
-            padding: 10px;
+            background: linear-gradient(135deg, #E6F3FF 0%, #F0F8FF 100%);
+            border-left: 4px solid var(--tr-light-blue);
+            padding: 16px;
             margin-bottom: 20px;
-            border-radius: 4px;
+            border-radius: 6px;
+            color: var(--tr-dark-blue);
         }
+        
         .figma-info {
-            background: #f3e5f5;
-            border-left: 4px solid #f24e1e;
-            padding: 10px;
+            background: linear-gradient(135deg, #FFF4E6 0%, #FFF8F0 100%);
+            border-left: 4px solid var(--tr-orange);
+            padding: 16px;
             margin-bottom: 20px;
-            border-radius: 4px;
+            border-radius: 6px;
+            color: var(--tr-dark-blue);
         }
+        
+        .nav-tabs {
+            border-bottom: 2px solid var(--tr-orange);
+            margin-bottom: 24px;
+        }
+        
         .nav-tabs .nav-link {
-            color: #495057;
+            color: var(--tr-gray-medium);
+            font-weight: 500;
+            border: none;
+            border-radius: 6px 6px 0 0;
+            margin-right: 4px;
+            transition: all 0.3s ease;
         }
+        
+        .nav-tabs .nav-link:hover {
+            color: var(--tr-dark-blue);
+            background-color: #F8F8F8;
+        }
+        
         .nav-tabs .nav-link.active {
-            color: #0d6efd;
-            font-weight: bold;
+            color: var(--tr-white) !important;
+            background: linear-gradient(135deg, var(--tr-orange) 0%, #E55A00 100%);
+            font-weight: 700;
+            box-shadow: 0 2px 8px rgba(255, 98, 0, 0.3);
+        }
+        
+        /* Welcome Modal Styles - Thomson Reuters */
+        .modal-content {
+            border-radius: 12px;
+            border: none;
+            box-shadow: 0 12px 40px rgba(15, 20, 25, 0.2);
+        }
+        
+        .modal-header {
+            background: linear-gradient(135deg, var(--tr-dark-blue) 0%, var(--tr-gray-dark) 100%);
+            border-radius: 12px 12px 0 0;
+            border-bottom: none;
+            padding: 24px 32px;
+            color: var(--tr-white);
+        }
+        
+        .modal-header .modal-title {
+            font-weight: 700;
+            color: var(--tr-white);
+        }
+        
+        .modal-body {
+            padding: 32px;
+            background: var(--tr-white);
+        }
+        
+        .modal-footer {
+            border-top: 1px solid #E0E0E0;
+            padding: 24px 32px;
+            background: #FAFAFA;
+            border-radius: 0 0 12px 12px;
+        }
+        
+        .welcome-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+            border: 2px solid #E0E0E0;
+            background: var(--tr-white);
+        }
+        
+        .welcome-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(15, 20, 25, 0.1);
+            border-color: var(--tr-orange);
+        }
+        
+        .welcome-card.selected {
+            border-color: var(--tr-orange);
+            background: linear-gradient(135deg, #FFF4E6 0%, #FFF8F0 100%);
+            box-shadow: 0 4px 16px rgba(255, 98, 0, 0.15);
+        }
+        
+        /* Toast Notifications - Thomson Reuters */
+        .toast {
+            border-radius: 8px;
+            border: none;
+            box-shadow: 0 4px 16px rgba(15, 20, 25, 0.15);
+        }
+        
+        .toast-header {
+            background: var(--tr-white);
+            border-bottom: 1px solid #E0E0E0;
+        }
+        
+        /* Project Setup Form Styles - Thomson Reuters */
+        #projectSetupForm .form-label {
+            font-weight: 600;
+            color: var(--tr-dark-blue);
+            margin-bottom: 8px;
+        }
+        
+        #projectSetupForm .form-label i {
+            margin-right: 8px;
+            color: var(--tr-orange);
+        }
+        
+        #projectSetupForm .form-control,
+        #projectSetupForm .form-select {
+            border-radius: 6px;
+            border: 1px solid #D0D0D0;
+            padding: 12px 16px;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            font-size: 0.9rem;
+        }
+        
+        #projectSetupForm .form-control:focus,
+        #projectSetupForm .form-select:focus {
+            border-color: var(--tr-orange);
+            box-shadow: 0 0 0 0.2rem rgba(255, 98, 0, 0.15);
+            outline: none;
+        }
+        
+        #projectSetupForm .form-text {
+            font-size: 0.75rem;
+            color: var(--tr-gray-medium);
+        }
+        
+        /* Button Styles - Thomson Reuters */
+        .btn-primary {
+            background: linear-gradient(135deg, var(--tr-orange) 0%, #E55A00 100%);
+            border: none;
+            border-radius: 6px;
+            padding: 12px 24px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(255, 98, 0, 0.25);
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #E55A00 0%, #CC5200 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(255, 98, 0, 0.35);
+        }
+        
+        .btn-outline-secondary {
+            border: 1px solid var(--tr-gray-medium);
+            color: var(--tr-gray-medium);
+            border-radius: 6px;
+            padding: 12px 24px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-outline-secondary:hover {
+            background: var(--tr-gray-medium);
+            border-color: var(--tr-gray-medium);
+            color: var(--tr-white);
+        }
+        
+        .btn-outline-light {
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: var(--tr-white);
+            border-radius: 6px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-outline-light:hover {
+            background: var(--tr-orange);
+            border-color: var(--tr-orange);
+            color: var(--tr-white);
+        }
+        
+        /* Alert Styles - Thomson Reuters */
+        .alert-info {
+            background: linear-gradient(135deg, #E6F3FF 0%, #F0F8FF 100%);
+            border: 1px solid var(--tr-light-blue);
+            color: var(--tr-dark-blue);
+            border-radius: 6px;
+        }
+        
+        .alert-info i {
+            color: var(--tr-light-blue);
+        }
+        
+        /* Welcome Screen Styles */
+        .welcome-hero {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        .welcome-setup-card {
+            border: 1px solid #E0E0E0;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(15, 20, 25, 0.08);
+            transition: all 0.3s ease;
+        }
+        
+        .welcome-setup-card:hover {
+            box-shadow: 0 8px 30px rgba(15, 20, 25, 0.12);
+            border-color: var(--tr-orange);
+        }
+        
+        .setup-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+        
+        .setup-step {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            padding: 20px;
+            background: linear-gradient(135deg, #FAFAFA 0%, #FFFFFF 100%);
+            border-radius: 8px;
+            border: 1px solid #F0F0F0;
+            transition: all 0.3s ease;
+        }
+        
+        .setup-step:hover {
+            border-color: var(--tr-orange);
+            box-shadow: 0 2px 12px rgba(255, 98, 0, 0.1);
+        }
+        
+        .step-number {
+            background: linear-gradient(135deg, var(--tr-orange) 0%, #E55A00 100%);
+            color: var(--tr-white);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(255, 98, 0, 0.3);
+        }
+        
+        .step-content {
+            flex: 1;
+        }
+        
+        .step-content h6 {
+            color: var(--tr-dark-blue);
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .step-content p {
+            margin-bottom: 12px;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .setup-steps {
+                gap: 16px;
+            }
+            
+            .setup-step {
+                padding: 16px;
+            }
+            
+            .welcome-hero h2 {
+                font-size: 1.75rem;
+            }
+            
+            .welcome-hero .lead {
+                font-size: 1rem;
+            }
         }
     </style>
 </head>
@@ -80,15 +424,98 @@
     <nav class="navbar navbar-dark bg-primary">
         <div class="container-fluid">
             <span class="navbar-brand">
-                <i class="fas fa-chart-line"></i> Analytics Dashboard
+                <i class="fas fa-chart-line"></i> Thomson Reuters Analytics
             </span>
             <div class="navbar-nav ms-auto">
+                <button class="btn btn-outline-light btn-sm me-3" onclick="showWelcomeModal()" title="Show Project Setup">
+                    <i class="fas fa-cog"></i> Project Setup
+                </button>
                 <span class="navbar-text">
-                    <i class="fas fa-key"></i> Multi-Platform Analytics
+                    <i class="fas fa-building"></i> Enterprise Analytics Platform
                 </span>
             </div>
         </div>
     </nav>
+
+    <!-- Welcome Modal -->
+    <div class="modal fade" id="welcomeModal" tabindex="-1" aria-labelledby="welcomeModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="welcomeModalLabel">
+                        <i class="fas fa-building"></i> Thomson Reuters Project Setup
+                    </h5>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center mb-4">
+                        <i class="fab fa-microsoft fa-3x mb-3" style="color: var(--tr-orange);"></i>
+                        <h4 style="color: var(--tr-dark-blue);">Azure DevOps Configuration</h4>
+                        <p class="text-muted">Configure your project settings to start analyzing your development metrics</p>
+                    </div>
+                    
+                    <form id="projectSetupForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="setupOrgName" class="form-label">
+                                        <i class="fas fa-building"></i> Organization Name
+                                    </label>
+                                    <input type="text" class="form-control" id="setupOrgName" placeholder="e.g., tr-tax" required>
+                                    <div class="form-text">Your Azure DevOps organization name</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="setupProjectName" class="form-label">
+                                        <i class="fas fa-project-diagram"></i> Project Name
+                                    </label>
+                                    <input type="text" class="form-control" id="setupProjectName" placeholder="e.g., TaxProf" required>
+                                    <div class="form-text">Your Azure DevOps project name</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="mb-3">
+                                    <label for="setupAreaPath" class="form-label">
+                                        <i class="fas fa-sitemap"></i> Area Path
+                                    </label>
+                                    <input type="text" class="form-control" id="setupAreaPath" placeholder="e.g., TaxProf\\us\\taxAuto\\ADGE\\Prep">
+                                    <div class="form-text">Area path to filter work items (optional)</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="setupTimeRange" class="form-label">
+                                        <i class="fas fa-calendar-alt"></i> Time Range
+                                    </label>
+                                    <select class="form-select" id="setupTimeRange">
+                                        <option value="7">Last 7 days</option>
+                                        <option value="30" selected>Last 30 days</option>
+                                        <option value="90">Last 90 days</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            <strong>Note:</strong> Make sure you have a valid Azure DevOps Personal Access Token (PAT) configured in the system. You can update these settings later from the Azure DevOps tab.
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" onclick="skipSetup()">
+                        <i class="fas fa-times"></i> Skip Setup
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="saveProjectSetup()">
+                        <i class="fas fa-save"></i> Save & Continue
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div class="container-fluid">
         <div class="row">
@@ -209,9 +636,9 @@
                         <button class="btn btn-outline-info w-100 mb-2" onclick="syncRepositoriesFromAzureDevOps()">
                             <i class="fab fa-microsoft"></i> <i class="fas fa-arrow-right"></i> <i class="fab fa-github"></i> 
                             Sync from Azure DevOps
-                        </button>
+                                </button>
                         <small class="text-muted">Load repositories from Azure DevOps work items</small>
-                    </div>
+                            </div>
 
                     <div class="metric-selector">
                         <h6><i class="fas fa-list"></i> Selected Repositories</h6>
@@ -289,7 +716,7 @@
                             <option value="90">Last 90 days</option>
                         </select>
                     </div>
-                    
+
                     <div class="metric-selector mt-3">
                         <h6>Analysis Mode</h6>
                         <select class="form-select" id="azuredevops-analysis-mode">
@@ -302,14 +729,11 @@
                     <div class="metric-selector mt-3">
                         <h6>Chart Type</h6>
                         <select class="form-select" id="azuredevops-chart-type">
-                            <option value="overview" selected>📊 Activity Overview</option>
-                            <option value="work_items_by_type">🏷️ Work Items by Type</option>
-                            <option value="work_items_by_state">📋 Work Items by State</option>
-                            <option value="work_items_by_assignee">👤 Work Items by Assignee</option>
-                            <option value="prs_by_status">🔀 Pull Requests by Status</option>
-                            <option value="repositories_breakdown">📁 Repository Breakdown</option>
+                            <option value="workitem-type" selected>🏷️ Work Items by Type</option>
+                            <option value="workitem-state">📋 Work Items by State</option>
+                            <option value="workitem-assignee">👤 Work Items by Assignee</option>
                         </select>
-                        <small class="text-muted">Choose visualization type for your Azure DevOps data</small>
+                        <small class="text-muted">Charts based on work item data (PR charts available after background loading)</small>
                     </div>
 
                     <button class="btn btn-primary w-100" onclick="updateAzureDevOpsDashboard()">
@@ -374,6 +798,74 @@
 
             <!-- Main Content -->
             <div class="col-md-9 main-content">
+                <!-- Welcome Screen (shown when no data is loaded) -->
+                <div id="welcomeScreen" class="text-center py-5">
+                    <div class="welcome-hero">
+                        <i class="fas fa-chart-line fa-4x mb-4" style="color: var(--tr-orange);"></i>
+                        <h2 style="color: var(--tr-dark-blue); font-weight: 700;">Welcome to Thomson Reuters Analytics</h2>
+                        <p class="lead text-muted mb-5">Your enterprise analytics platform for Azure DevOps, GitHub, Datadog, and Figma</p>
+                        
+                        <div class="row justify-content-center">
+                            <div class="col-md-8">
+                                <div class="card welcome-setup-card">
+                                    <div class="card-body p-4">
+                                        <h4 class="mb-4" style="color: var(--tr-dark-blue);">
+                                            <i class="fas fa-rocket"></i> Get Started in 3 Easy Steps
+                                        </h4>
+                                        
+                                        <div class="setup-steps">
+                                            <div class="setup-step">
+                                                <div class="step-number">1</div>
+                                                <div class="step-content">
+                                                    <h6>Configure Your Project</h6>
+                                                    <p class="text-muted">Set up your Azure DevOps organization, project, and area path</p>
+                                                    <button class="btn btn-primary btn-sm" onclick="showWelcomeModal()">
+                                                        <i class="fas fa-cog"></i> Start Setup
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="setup-step">
+                                                <div class="step-number">2</div>
+                                                <div class="step-content">
+                                                    <h6>Verify Your Token</h6>
+                                                    <p class="text-muted">Ensure your Azure DevOps PAT token has proper permissions</p>
+                                                    <small class="text-info">
+                                                        <i class="fas fa-info-circle"></i> Required: Work Items (Read) & Code (Read)
+                                                    </small>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="setup-step">
+                                                <div class="step-number">3</div>
+                                                <div class="step-content">
+                                                    <h6>Start Analyzing</h6>
+                                                    <p class="text-muted">View your development metrics and insights</p>
+                                                    <small class="text-success">
+                                                        <i class="fas fa-check-circle"></i> Analytics will load automatically
+                                                    </small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="mt-4 p-3" style="background: linear-gradient(135deg, #FFF4E6 0%, #FFF8F0 100%); border-radius: 8px; border-left: 4px solid var(--tr-orange);">
+                                            <h6 style="color: var(--tr-dark-blue); margin-bottom: 8px;">
+                                                <i class="fas fa-lightbulb"></i> Quick Tip
+                                            </h6>
+                                            <p class="mb-0 small text-muted">
+                                                Once configured, you'll have access to work item analytics, pull request insights, 
+                                                repository metrics, and comprehensive development dashboards.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Analytics Content (hidden initially) -->
+                <div id="analyticsContent" style="display: none;">
                 <div class="row mb-4">
                     <div class="col-12">
                         <h2><i class="fas fa-tachometer-alt"></i> Analytics Overview</h2>
@@ -391,16 +883,6 @@
                     <li class="nav-item" role="presentation">
                         <button class="nav-link" id="github-tab" data-bs-toggle="tab" data-bs-target="#github-pane" type="button" role="tab">
                             <i class="fab fa-github"></i> GitHub Pull Requests
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="datadog-dashboards-tab" data-bs-toggle="tab" data-bs-target="#datadog-dashboards-pane" type="button" role="tab">
-                            <i class="fas fa-tachometer-alt"></i> Datadog Dashboards
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="datadog-tab" data-bs-toggle="tab" data-bs-target="#datadog-pane" type="button" role="tab">
-                            <i class="fas fa-chart-line"></i> Datadog Metrics
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
@@ -631,14 +1113,7 @@
                         <!-- Azure DevOps Charts -->
                         <div class="row">
                             <div class="col-12">
-                                <h4><i class="fas fa-chart-area"></i> Azure DevOps Analytics</h4>
-                            </div>
-                        </div>
-
-                        <!-- Azure DevOps Charts -->
-                        <div class="row">
-                            <div class="col-12">
-                                <h4><i class="fas fa-chart-area"></i> Azure DevOps Analytics Charts</h4>
+                                <h4><i class="fas fa-chart-area"></i> Work Item Analytics</h4>
                             </div>
                         </div>
 
@@ -662,15 +1137,6 @@
                             </div>
                         </div>
 
-                        <!-- Recent Builds -->
-                        <div class="row mt-4">
-                            <div class="col-12">
-                                <h4><i class="fas fa-hammer"></i> Recent Builds</h4>
-                                <div id="recent-builds-container">
-                                    <!-- Dynamic content will be loaded here -->
-                                </div>
-                            </div>
-                        </div>
                     </div>
 
                     <!-- Figma Tab -->
@@ -785,8 +1251,270 @@
         let currentTimeRange = 24;
         let currentChartType = 'line';
 
+        // Welcome Modal Functions
+        function showWelcomeModal() {
+            // Load default project settings before showing modal
+            loadDefaultProjectSettings();
+            
+            // Ensure Bootstrap is loaded before trying to show modal
+            if (typeof bootstrap !== 'undefined') {
+                const welcomeModal = new bootstrap.Modal(document.getElementById('welcomeModal'));
+                welcomeModal.show();
+            } else {
+                console.error('Bootstrap not loaded yet, retrying...');
+                setTimeout(() => {
+                    showWelcomeModal();
+                }, 100);
+            }
+        }
+
+        function skipSetup() {
+            const welcomeModal = bootstrap.Modal.getInstance(document.getElementById('welcomeModal'));
+            if (welcomeModal) {
+                welcomeModal.hide();
+            }
+            
+            // Show a brief toast notification
+            showToast('Setup skipped. You can configure project settings anytime from the Azure DevOps tab.', 'info');
+        }
+        
+        // Debug function to test modal
+        function testModal() {
+            console.log('🧪 Testing modal...');
+            console.log('Bootstrap available:', typeof bootstrap !== 'undefined');
+            console.log('Modal element exists:', !!document.getElementById('welcomeModal'));
+            console.log('Button element exists:', !!document.querySelector('[onclick="showWelcomeModal()"]'));
+            showWelcomeModal();
+        }
+
+        function saveProjectSetup() {
+            // Get form values
+            const orgName = document.getElementById('setupOrgName').value.trim();
+            const projectName = document.getElementById('setupProjectName').value.trim();
+            const areaPath = document.getElementById('setupAreaPath').value.trim();
+            const timeRange = document.getElementById('setupTimeRange').value;
+            
+            // Validate required fields
+            if (!orgName || !projectName) {
+                showToast('Please fill in both Organization Name and Project Name.', 'error');
+                return;
+            }
+            
+            // Save to the Azure DevOps configuration
+            document.getElementById('azuredevops-org').value = orgName;
+            document.getElementById('azuredevops-project').value = projectName;
+            document.getElementById('azuredevops-area-path').value = areaPath;
+            document.getElementById('azuredevops-time-range').value = timeRange;
+            
+            // Update global variables
+            azuredevopsOrg = orgName;
+            azuredevopsProject = projectName;
+            azuredevopsAreaPath = areaPath;
+            
+            // Close modal
+            const welcomeModal = bootstrap.Modal.getInstance(document.getElementById('welcomeModal'));
+            welcomeModal.hide();
+            
+            // Switch to Azure DevOps tab
+            const azuredevopsTab = document.getElementById('azuredevops-tab');
+            if (azuredevopsTab) {
+                azuredevopsTab.click();
+            }
+            
+            // Mark project as configured and show analytics content with all tabs
+            markProjectAsConfigured();
+            
+            // Show success message and highlight sidebar
+            setTimeout(() => {
+                showToast(`🎉 Project setup complete! Loading all analytics for ${orgName}/${projectName}`, 'success');
+                
+                // Highlight the Azure DevOps sidebar after it becomes visible
+                setTimeout(() => {
+                    const azuredevopsSidebar = document.getElementById('azuredevops-sidebar');
+                    if (azuredevopsSidebar) {
+                        azuredevopsSidebar.style.border = '2px solid var(--tr-orange)';
+                        azuredevopsSidebar.style.borderRadius = '10px';
+                        azuredevopsSidebar.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        
+                        // Remove highlight after 5 seconds
+                        setTimeout(() => {
+                            azuredevopsSidebar.style.border = '';
+                        }, 5000);
+                    }
+                }, 1000);
+            }, 500);
+        }
+
+        function loadDefaultProjectSettings() {
+            // Pre-populate with existing values if available
+            const existingOrg = document.getElementById('azuredevops-org')?.value || 'tr-tax';
+            const existingProject = document.getElementById('azuredevops-project')?.value || 'TaxProf';
+            const existingAreaPath = document.getElementById('azuredevops-area-path')?.value || 'TaxProf\\us\\taxAuto\\ADGE\\Prep';
+            
+            document.getElementById('setupOrgName').value = existingOrg;
+            document.getElementById('setupProjectName').value = existingProject;
+            document.getElementById('setupAreaPath').value = existingAreaPath;
+        }
+
+        function showToast(message, type = 'info') {
+            // Create toast element if it doesn't exist
+            let toastContainer = document.getElementById('toast-container');
+            if (!toastContainer) {
+                toastContainer = document.createElement('div');
+                toastContainer.id = 'toast-container';
+                toastContainer.className = 'position-fixed top-0 end-0 p-3';
+                toastContainer.style.zIndex = '1055';
+                document.body.appendChild(toastContainer);
+            }
+            
+            const toastId = 'toast-' + Date.now();
+            const toastHtml = `
+                <div id="${toastId}" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="toast-header">
+                        <i class="fas fa-info-circle text-${type === 'success' ? 'success' : type === 'error' ? 'danger' : 'info'} me-2"></i>
+                        <strong class="me-auto">Analytics Dashboard</strong>
+                        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                    <div class="toast-body">
+                        ${message}
+                    </div>
+                </div>
+            `;
+            
+            toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+            
+            const toastElement = document.getElementById(toastId);
+            const toast = new bootstrap.Toast(toastElement, { delay: 5000 });
+            toast.show();
+            
+            // Remove toast element after it's hidden
+            toastElement.addEventListener('hidden.bs.toast', () => {
+                toastElement.remove();
+            });
+        }
+
+        // Check if this is the first visit and show appropriate screen
+        function checkFirstVisit() {
+            const hasVisited = localStorage.getItem('analytics-dashboard-visited');
+            const hasConfiguredProject = localStorage.getItem('analytics-project-configured');
+            
+            if (!hasVisited) {
+                localStorage.setItem('analytics-dashboard-visited', 'true');
+                setTimeout(() => {
+                    showWelcomeModal();
+                }, 1000); // Show modal after 1 second to let page load
+            } else if (!hasConfiguredProject) {
+                // Show welcome screen instead of tabs if no project is configured
+                showWelcomeScreen();
+            } else {
+                // Show analytics content if project is configured
+                showAnalyticsContent();
+            }
+        }
+        
+        function showWelcomeScreen() {
+            document.getElementById('welcomeScreen').style.display = 'block';
+            document.getElementById('analyticsContent').style.display = 'none';
+            
+            // Hide sidebar during welcome screen
+            const sidebar = document.querySelector('.col-md-3');
+            const mainContent = document.querySelector('.col-md-9');
+            if (sidebar && mainContent) {
+                sidebar.style.display = 'none';
+                mainContent.classList.remove('col-md-9');
+                mainContent.classList.add('col-md-12');
+            }
+            
+            console.log('📋 Showing welcome screen - no project configured');
+        }
+        
+        function showAnalyticsContent() {
+            document.getElementById('welcomeScreen').style.display = 'none';
+            document.getElementById('analyticsContent').style.display = 'block';
+            
+            // Show sidebar when analytics content is displayed
+            const sidebar = document.querySelector('.col-md-3');
+            const mainContent = document.querySelector('.col-md-12');
+            if (sidebar && mainContent) {
+                sidebar.style.display = 'block';
+                mainContent.classList.remove('col-md-12');
+                mainContent.classList.add('col-md-9');
+            }
+            
+            // Initialize all tabs and load their data
+            initializeAllTabs();
+            
+            console.log('📊 Showing analytics content - project configured');
+        }
+        
+        function initializeAllTabs() {
+            console.log('🚀 Initializing all tabs and loading data...');
+            
+            // Load Azure DevOps data (primary tab)
+            setTimeout(() => {
+                if (typeof configureAzureDevOps === 'function') {
+                    configureAzureDevOps();
+                }
+            }, 100);
+            
+            // Load GitHub data
+            setTimeout(() => {
+                if (typeof updateGitHubSummary === 'function') {
+                    updateGitHubSummary();
+                }
+            }, 500);
+            
+            // Load Datadog dashboards
+            setTimeout(() => {
+                if (typeof loadAllDashboards === 'function') {
+                    loadAllDashboards();
+                }
+            }, 1000);
+            
+            // Load Datadog metrics
+            setTimeout(() => {
+                if (typeof loadAvailableMetrics === 'function') {
+                    loadAvailableMetrics();
+                }
+            }, 1500);
+            
+            // Load Datadog logs
+            setTimeout(() => {
+                if (typeof loadLogsSummary === 'function') {
+                    loadLogsSummary();
+                }
+                if (typeof loadAvailableServices === 'function') {
+                    loadAvailableServices();
+                }
+            }, 2000);
+            
+            // Load Figma data
+            setTimeout(() => {
+                if (typeof updateFigmaAnalytics === 'function') {
+                    updateFigmaAnalytics();
+                }
+            }, 2500);
+            
+            console.log('✅ All tabs initialization scheduled');
+        }
+        
+        function markProjectAsConfigured() {
+            localStorage.setItem('analytics-project-configured', 'true');
+            showAnalyticsContent();
+        }
+        
+        // For testing - reset project configuration
+        function resetProjectConfiguration() {
+            localStorage.removeItem('analytics-project-configured');
+            showWelcomeScreen();
+            console.log('🔄 Project configuration reset - showing welcome screen');
+        }
+
         // Load available metrics on page load
         document.addEventListener('DOMContentLoaded', function() {
+            // Check for first visit and show welcome modal
+            checkFirstVisit();
+            
             loadAvailableMetrics();
             
             // Auto-select some default metrics for better user experience
@@ -1421,16 +2149,16 @@
                         
                     } else {
                         // Display as chart
-                        chartDiv.innerHTML = `
-                            <div class="chart-container">
-                                <div id="github-chart" style="height: 500px;"></div>
-                            </div>
-                        `;
-                        container.appendChild(chartDiv);
+                    chartDiv.innerHTML = `
+                        <div class="chart-container">
+                            <div id="github-chart" style="height: 500px;"></div>
+                        </div>
+                    `;
+                    container.appendChild(chartDiv);
 
-                        // Render the chart
-                        const chartData = JSON.parse(result.chart);
-                        Plotly.newPlot('github-chart', chartData.data, chartData.layout);
+                    // Render the chart
+                    const chartData = JSON.parse(result.chart);
+                    Plotly.newPlot('github-chart', chartData.data, chartData.layout);
                     }
                 } else {
                     console.error('Error loading GitHub chart:', result.message);
@@ -1531,23 +2259,24 @@
             }
 
             const days = document.getElementById('azuredevops-time-range').value;
-            const chartType = document.getElementById('azuredevops-chart-type').value;
 
-            // Update Azure DevOps analytics summary
+            // Update Azure DevOps analytics summary (includes instant chart generation)
             await updateAzureDevOpsSummary(days);
             
-            // Update charts with selected type
-            await updateAzureDevOpsCharts(days, chartType);
-            
-            // Update recent items
-            await updateRecentAzureDevOpsItems(days);
+            // Skip separate chart update - already done in updateAzureDevOpsSummary
+            // Skip separate recent items update - already done in updateAzureDevOpsSummary
         }
 
         async function updateAzureDevOpsSummary(days) {
-            const analysisMode = document.getElementById('azuredevops-analysis-mode').value;
-            const isDetailedMode = analysisMode === 'detailed';
+            // Step 1: Load work items first (fast)
+            await loadWorkItemsSummary(days);
             
-            // Show loading spinner with mode-specific messaging
+            // Step 2: Load PR data asynchronously (slower)
+            loadPullRequestsData(days);
+        }
+        
+        async function loadWorkItemsSummary(days) {
+            // Show loading spinner for work items
             const container = document.getElementById('azuredevops-summary');
             container.innerHTML = `
                 <div class="col-12 text-center py-5">
@@ -1555,15 +2284,10 @@
                         <span class="visually-hidden">Loading...</span>
                     </div>
                     <div class="mt-3">
-                        <h6 class="text-muted">${isDetailedMode ? '🔍 Loading Detailed Analytics...' : '🚀 Loading Fast Analytics...'}</h6>
-                        <small class="text-muted">
-                            ${isDetailedMode 
-                                ? `Analyzing work items + PR relations (${days} days) - This may take 1-2 minutes`
-                                : `Fetching work items for the last ${days} days - Should complete in 1-2 seconds`
-                            }
-                        </small>
+                        <h6 class="text-muted">📋 Loading Work Items...</h6>
+                        <small class="text-muted">Fetching work items for the last ${days} days</small>
                         <div class="progress mt-2" style="height: 4px; width: 250px; margin: 0 auto;">
-                            <div class="progress-bar progress-bar-striped progress-bar-animated ${isDetailedMode ? 'bg-warning' : 'bg-success'}" 
+                            <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" 
                                  role="progressbar" style="width: 100%"></div>
                         </div>
                     </div>
@@ -1571,7 +2295,7 @@
             `;
             
             try {
-                console.log(`🚀 Fetching Azure DevOps analytics (${analysisMode} mode) for ${days} days...`);
+                console.log(`📋 Fetching work items summary for ${days} days...`);
                 const startTime = performance.now();
                 
                 // Build query parameters
@@ -1585,32 +2309,394 @@
                     params.append('area_path', azuredevopsAreaPath);
                 }
                 
-                // Choose endpoint based on analysis mode
-                const endpoint = isDetailedMode 
-                    ? `/api/azuredevops/analytics-detailed?${params}`
-                    : `/api/azuredevops/analytics?${params}`;
-                
-                const response = await fetch(endpoint);
+                // Use work items only endpoint for fast loading
+                const response = await fetch(`/api/azuredevops/workitems-summary?${params}`);
                 const result = await response.json();
                 
                 const endTime = performance.now();
                 const loadTime = (endTime - startTime).toFixed(2);
-                console.log(`⚡ Azure DevOps analytics (${analysisMode}) loaded in ${loadTime}ms`);
+                console.log(`⚡ Work items loaded in ${loadTime}ms`);
 
                 if (result.status === 'success') {
                     displayAzureDevOpsSummary(result.data);
                     
-                    // Show performance note
-                    if (result.data.performance_note) {
-                        console.log(`📊 ${result.data.performance_note}`);
-                    }
+                    // Update charts immediately with work items data
+                    console.log('📊 Generating charts immediately with work items data...');
+                    updateWorkItemsChartsInstant(result.data);
+                    
+                    // Display recent work items
+                    displayRecentWorkItems(result.data.recent_work_items || []);
+                    
                 } else {
-                    console.error('Error updating Azure DevOps summary:', result.message);
-                    displayAzureDevOpsError('Failed to load Azure DevOps analytics: ' + result.message);
+                    console.error('Error loading work items:', result.message);
+                    displayAzureDevOpsError('Failed to load work items: ' + result.message);
                 }
             } catch (error) {
-                console.error('Error updating Azure DevOps summary:', error);
+                console.error('Error loading work items:', error);
                 displayAzureDevOpsError('Error connecting to Azure DevOps API: ' + error.message);
+            }
+        }
+        
+        async function loadPullRequestsData(days) {
+            // Show PR loading indicator
+            showPRLoadingIndicator();
+            
+            try {
+                console.log(`🔄 Loading pull requests data for ${days} days...`);
+                const startTime = performance.now();
+                
+                // Build query parameters
+                const params = new URLSearchParams({
+                    days: days,
+                    org: azuredevopsOrg,
+                    project: azuredevopsProject
+                });
+                
+                if (azuredevopsAreaPath) {
+                    params.append('area_path', azuredevopsAreaPath);
+                }
+                
+                // Use detailed analytics endpoint for PR data
+                const response = await fetch(`/api/azuredevops/analytics-detailed?${params}`);
+                const result = await response.json();
+                
+                const endTime = performance.now();
+                const loadTime = (endTime - startTime).toFixed(2);
+                console.log(`⚡ Pull requests data loaded in ${loadTime}ms`);
+
+                if (result.status === 'success') {
+                    // Update PR and commit cards with detailed data
+                    updatePRAndCommitCards(result.data);
+                    
+                    // Display recent pull requests and commits
+                    if (typeof displayRecentPRsAndCommits === 'function') {
+                        displayRecentPRsAndCommits(result.data.recent_pull_requests || [], result.data);
+                    } else {
+                        console.warn('displayRecentPRsAndCommits not available, using fallback');
+                        displayRecentAzureDevOpsPRs(result.data.recent_pull_requests || []);
+                    }
+                    
+                    // Hide PR loading indicator
+                    hidePRLoadingIndicator();
+                    
+                    console.log(`✅ PR data loaded: ${result.data.total_pull_requests || 0} PRs, ${result.data.total_commits || 0} commits`);
+                    
+                } else {
+                    console.error('Error loading pull requests:', result.message);
+                    showPRLoadingError('Failed to load pull requests: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Error loading pull requests:', error);
+                showPRLoadingError('Error loading pull requests: ' + error.message);
+            }
+        }
+        
+        function updateWorkItemsCharts(data) {
+            // Update charts based on work items data only
+            const chartTypeElement = document.getElementById('azuredevops-chart-type');
+            
+            if (!chartTypeElement) {
+                console.error('Chart type selector not found: azuredevops-chart-type');
+                return;
+            }
+            
+            const chartType = chartTypeElement.value;
+            
+            let chartData;
+            switch(chartType) {
+                case 'workitem-type':
+                    chartData = data.work_items_by_type || {};
+                    break;
+                case 'workitem-state':
+                    chartData = data.work_items_by_state || {};
+                    break;
+                case 'workitem-assignee':
+                    chartData = data.work_items_by_assignee || {};
+                    break;
+                default:
+                    chartData = data.work_items_by_type || {};
+            }
+            
+            // Generate chart
+            generateWorkItemChart(chartData, chartType);
+        }
+        
+        function updateWorkItemsChartsInstant(data) {
+            // Instant chart generation - no delays, direct rendering
+            console.log('⚡ INSTANT: Starting immediate chart generation...');
+            console.log('⚡ INSTANT: Received data:', data);
+            const startTime = performance.now();
+            
+            const chartTypeElement = document.getElementById('azuredevops-chart-type');
+            
+            if (!chartTypeElement) {
+                console.error('Chart type selector not found: azuredevops-chart-type');
+                // Use default chart type if selector not found
+                const defaultChartType = 'workitem-type';
+                const defaultChartData = data.work_items_by_type || {};
+                console.log(`⚡ INSTANT: Using default chart type: ${defaultChartType}`);
+                generateWorkItemChartInstant(defaultChartData, defaultChartType);
+                return;
+            }
+            
+            const chartType = chartTypeElement.value;
+            console.log(`⚡ INSTANT: Chart type selected: ${chartType}`);
+            
+            let chartData;
+            switch(chartType) {
+                case 'workitem-type':
+                    chartData = data.work_items_by_type || {};
+                    console.log(`⚡ INSTANT: Work items by type data:`, chartData);
+                    break;
+                case 'workitem-state':
+                    chartData = data.work_items_by_state || {};
+                    console.log(`⚡ INSTANT: Work items by state data:`, chartData);
+                    break;
+                case 'workitem-assignee':
+                    chartData = data.work_items_by_assignee || {};
+                    console.log(`⚡ INSTANT: Work items by assignee data:`, chartData);
+                    break;
+                default:
+                    chartData = data.work_items_by_type || {};
+                    console.log(`⚡ INSTANT: Default work items by type data:`, chartData);
+            }
+            
+            // Generate chart immediately
+            generateWorkItemChartInstant(chartData, chartType);
+            
+            const endTime = performance.now();
+            console.log(`⚡ INSTANT: Chart generated in ${(endTime - startTime).toFixed(2)}ms`);
+        }
+        
+        function generateWorkItemChart(data, chartType) {
+            const chartContainer = document.getElementById('azuredevops-chart');
+            
+            // Check if chart container exists
+            if (!chartContainer) {
+                console.error('Chart container not found: azuredevops-chart');
+                return;
+            }
+            
+            // Check if data is valid
+            if (!data || Object.keys(data).length === 0) {
+                console.warn('No data provided for chart generation');
+                chartContainer.innerHTML = '<div class="alert alert-info">No data available for chart</div>';
+                return;
+            }
+            
+            const labels = Object.keys(data);
+            const values = Object.values(data);
+            
+            const chartTitle = {
+                'workitem-type': 'Work Items by Type',
+                'workitem-state': 'Work Items by State', 
+                'workitem-assignee': 'Work Items by Assignee'
+            }[chartType] || 'Work Items Distribution';
+            
+            const trace = {
+                labels: labels,
+                values: values,
+                type: 'pie',
+                marker: {
+                    colors: ['#FF6200', '#0073E6', '#00A651', '#FFB81C', '#E31837', '#2C2C2C', '#5A5A5A']
+                }
+            };
+            
+            const layout = {
+                title: chartTitle,
+                font: { family: 'Segoe UI, sans-serif' },
+                showlegend: true,
+                margin: { t: 50, b: 50, l: 50, r: 50 }
+            };
+            
+            try {
+                Plotly.newPlot(chartContainer, [trace], layout, {responsive: true});
+            } catch (error) {
+                console.error('Error creating chart:', error);
+                chartContainer.innerHTML = '<div class="alert alert-danger">Error creating chart</div>';
+            }
+        }
+        
+        function generateWorkItemChartInstant(data, chartType) {
+            console.log('⚡ INSTANT CHART: Starting generation...');
+            
+            // First ensure the charts container exists and set up the chart div
+            const chartsContainer = document.getElementById('azuredevops-charts-container');
+            if (!chartsContainer) {
+                console.error('Charts container not found: azuredevops-charts-container');
+                return;
+            }
+            
+            // Create the chart container if it doesn't exist
+            let chartContainer = document.getElementById('azuredevops-chart');
+            if (!chartContainer) {
+                console.log('⚡ INSTANT CHART: Creating chart container...');
+                chartsContainer.innerHTML = `
+                    <div class="chart-container">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h5 class="mb-0">Work Item Analytics</h5>
+                            <small class="text-muted">📊 Instant Chart</small>
+                        </div>
+                        <div id="azuredevops-chart" style="height: 500px;"></div>
+                    </div>
+                `;
+                chartContainer = document.getElementById('azuredevops-chart');
+            }
+            
+            // Check if chart container exists now
+            if (!chartContainer) {
+                console.error('Chart container still not found after creation');
+                return;
+            }
+            
+            // Check if data is valid
+            if (!data || Object.keys(data).length === 0) {
+                console.warn('No data provided for instant chart generation');
+                chartContainer.innerHTML = '<div class="alert alert-info">No data available for chart</div>';
+                return;
+            }
+            
+            const labels = Object.keys(data);
+            const values = Object.values(data);
+            console.log(`⚡ INSTANT CHART: Labels: ${labels.join(', ')}`);
+            console.log(`⚡ INSTANT CHART: Values: ${values.join(', ')}`);
+            
+            const chartTitle = {
+                'workitem-type': 'Work Items by Type',
+                'workitem-state': 'Work Items by State', 
+                'workitem-assignee': 'Work Items by Assignee'
+            }[chartType] || 'Work Items Distribution';
+            
+            // Optimized trace for instant rendering
+            const trace = {
+                labels: labels,
+                values: values,
+                type: 'pie',
+                marker: {
+                    colors: ['#FF6200', '#0073E6', '#00A651', '#FFB81C', '#E31837', '#2C2C2C', '#5A5A5A']
+                },
+                textinfo: 'label+percent',
+                textposition: 'outside'
+            };
+            
+            // Optimized layout for performance
+            const layout = {
+                title: {
+                    text: chartTitle,
+                    font: { family: 'Segoe UI, sans-serif', size: 16 }
+                },
+                font: { family: 'Segoe UI, sans-serif', size: 12 },
+                showlegend: true,
+                margin: { t: 50, b: 50, l: 50, r: 50 },
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                plot_bgcolor: 'rgba(0,0,0,0)'
+            };
+            
+            // Optimized config for instant rendering
+            const config = {
+                responsive: true,
+                displayModeBar: false,
+                staticPlot: false
+            };
+            
+            try {
+                console.log('⚡ INSTANT CHART: Calling Plotly.newPlot...');
+                Plotly.newPlot(chartContainer, [trace], layout, config);
+                console.log('⚡ INSTANT CHART: Chart rendered successfully!');
+            } catch (error) {
+                console.error('Error creating instant chart:', error);
+                chartContainer.innerHTML = '<div class="alert alert-danger">Error creating chart</div>';
+            }
+        }
+        
+        function showPRLoadingIndicator() {
+            // Show loading message in PR container (cards now show loading state directly)
+            const prContainer = document.getElementById('recent-azuredevops-prs-container');
+            if (prContainer) {
+                prContainer.innerHTML = `
+                    <div class="alert alert-info">
+                        <div class="d-flex align-items-center">
+                            <div class="spinner-border spinner-border-sm me-3" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <div>
+                                <strong>Loading Pull Requests...</strong><br>
+                                <small>Analyzing work item relations and extracting PR data</small>
+                            </div>
+                        </div>
+                        <div class="progress mt-2" style="height: 4px;">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated bg-info" 
+                                 role="progressbar" style="width: 100%"></div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                console.warn('PR container not found for loading indicator');
+            }
+            
+            console.log('📊 PR loading indicator shown - cards display loading state directly');
+        }
+        
+        function hidePRLoadingIndicator() {
+            // Remove loading indicators - cards will be updated by updatePRAndCommitCards
+            console.log('✅ PR loading completed');
+        }
+        
+        function showPRLoadingError(message) {
+            const prContainer = document.getElementById('recent-azuredevops-prs-container');
+            if (prContainer) {
+                prContainer.innerHTML = `<div class="alert alert-danger">${message}</div>`;
+            }
+        }
+        
+        function updatePRAndCommitCards(data) {
+            console.log('🔄 Updating PR and Commit cards with final data:', data);
+            
+            // Update the PR and Commits cards with actual data
+            const prCard = document.querySelector('[data-card="pull-requests"]');
+            const commitCard = document.querySelector('[data-card="commits"]');
+            const repoCard = document.querySelector('[data-card="repositories"]');
+            
+            if (prCard) {
+                prCard.innerHTML = `
+                    <div class="card-body text-center">
+                        <i class="fas fa-code-branch fa-2x text-success mb-2"></i>
+                        <h5 class="card-title">${data.total_pull_requests || 0}</h5>
+                        <p class="card-text text-muted">Pull Requests</p>
+                        <small class="text-muted">Linked to work items</small>
+                    </div>
+                `;
+                console.log(`✅ Updated PR card: ${data.total_pull_requests || 0} PRs`);
+            } else {
+                console.warn('PR card not found for update');
+            }
+            
+            if (commitCard) {
+                commitCard.innerHTML = `
+                    <div class="card-body text-center">
+                        <i class="fas fa-commit fa-2x text-info mb-2"></i>
+                        <h5 class="card-title">${data.total_commits || 0}</h5>
+                        <p class="card-text text-muted">Commits</p>
+                        <small class="text-muted">Code changes</small>
+                    </div>
+                `;
+                console.log(`✅ Updated Commits card: ${data.total_commits || 0} commits`);
+            } else {
+                console.warn('Commits card not found for update');
+            }
+            
+            if (repoCard) {
+                repoCard.innerHTML = `
+                    <div class="card-body text-center">
+                        <i class="fas fa-folder-open fa-2x text-warning mb-2"></i>
+                        <h5 class="card-title">${data.total_repositories || 0}</h5>
+                        <p class="card-text text-muted">Repositories</p>
+                        <small class="text-muted">Active repos</small>
+                    </div>
+                `;
+                console.log(`✅ Updated Repositories card: ${data.total_repositories || 0} repos`);
+            } else {
+                console.warn('Repositories card not found for update');
             }
         }
 
@@ -1628,36 +2714,49 @@
                 },
                 {
                     title: 'Pull Requests',
-                    value: data.total_pull_requests,
+                    value: data.pr_loading ? 'Loading...' : (data.total_pull_requests || 0),
                     icon: 'fas fa-code-branch',
-                    color: 'success',
-                    subtitle: 'Linked to work items'
+                    color: data.pr_loading ? 'secondary' : 'success',
+                    subtitle: data.pr_loading ? 'Analyzing work items...' : 'Linked to work items',
+                    loading: data.pr_loading
                 },
                 {
                     title: 'Commits',
-                    value: data.total_commits || 0,
+                    value: data.pr_loading ? 'Loading...' : (data.total_commits || 0),
                     icon: 'fas fa-commit',
-                    color: 'info',
-                    subtitle: 'Code changes'
+                    color: data.pr_loading ? 'secondary' : 'info',
+                    subtitle: data.pr_loading ? 'Extracting from PRs...' : 'Code changes',
+                    loading: data.pr_loading
                 },
                 {
                     title: 'Repositories',
-                    value: data.total_repositories,
+                    value: data.pr_loading ? 'Loading...' : (data.total_repositories || 0),
                     icon: 'fas fa-folder-open',
-                    color: 'warning',
-                    subtitle: 'Active repos'
+                    color: data.pr_loading ? 'secondary' : 'warning',
+                    subtitle: data.pr_loading ? 'Discovering repos...' : 'Active repos',
+                    loading: data.pr_loading
                 }
             ];
 
             summaryCards.forEach(card => {
                 const col = document.createElement('div');
                 col.className = 'col-md-3 mb-3';
+                
+                // Add data attribute for card identification
+                const cardType = card.title.toLowerCase().replace(/\s+/g, '-');
+                
                 col.innerHTML = `
-                    <div class="card metric-card h-100">
+                    <div class="card metric-card h-100" data-card="${cardType}">
                         <div class="card-body text-center">
-                            <i class="${card.icon} fa-2x text-${card.color} mb-2"></i>
+                            ${card.loading ? 
+                                `<div class="spinner-border spinner-border-sm text-${card.color} mb-2" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>` : 
+                                `<i class="${card.icon} fa-2x text-${card.color} mb-2"></i>`
+                            }
                             <h5 class="card-title">${card.value}</h5>
                             <p class="card-text text-muted">${card.title}</p>
+                            ${card.subtitle ? `<small class="text-muted">${card.subtitle}</small>` : ''}
                         </div>
                     </div>
                 `;
@@ -1782,17 +2881,14 @@
                 if (result.status === 'success' && result.data) {
                     displayRecentWorkItems(result.data.recent_work_items || []);
                     displayRecentAzureDevOpsPRs(result.data.recent_pull_requests || []);
-                    displayRecentBuilds(result.data.recent_builds || []);
                 } else {
                     document.getElementById('recent-workitems-container').innerHTML = '<div class="alert alert-info">No recent work items found.</div>';
                     document.getElementById('recent-azuredevops-prs-container').innerHTML = '<div class="alert alert-info">No recent pull requests found.</div>';
-                    document.getElementById('recent-builds-container').innerHTML = '<div class="alert alert-info">No recent builds found.</div>';
                 }
             } catch (error) {
                 console.error('Error loading recent Azure DevOps items:', error);
                 document.getElementById('recent-workitems-container').innerHTML = '<div class="alert alert-danger">Error loading recent work items</div>';
                 document.getElementById('recent-azuredevops-prs-container').innerHTML = '<div class="alert alert-danger">Error loading recent pull requests</div>';
-                document.getElementById('recent-builds-container').innerHTML = '<div class="alert alert-danger">Error loading recent builds</div>';
             }
         }
 
@@ -1860,38 +2956,106 @@
                 container.appendChild(prDiv);
             });
         }
-
-        function displayRecentBuilds(builds) {
-            const container = document.getElementById('recent-builds-container');
+        
+        function displayRecentPRsAndCommits(prs, data) {
+            console.log('🔄 Displaying recent PRs and commits:', { prs: prs.length, data });
+            const container = document.getElementById('recent-azuredevops-prs-container');
             container.innerHTML = '';
 
-            builds.forEach(build => {
-                const buildDiv = document.createElement('div');
-                buildDiv.className = 'card mb-2';
+            // Combine PRs and commits from work items
+            let allItems = [];
+            
+            // Add PRs
+            if (prs && prs.length > 0) {
+                prs.forEach(pr => {
+                    allItems.push({
+                        type: 'pr',
+                        title: pr.title || `PR #${pr.pullRequestId || 'N/A'}`,
+                        url: pr.url || '#',
+                        repository: pr.repository?.name || 'Unknown',
+                        date: pr.creationDate || pr.date,
+                        work_item_title: pr.work_item_title || '',
+                        author: pr.createdBy?.displayName || 'Unknown'
+                    });
+                });
+            }
+            
+            // Extract commits from work items if available
+            if (data.recent_work_items) {
+                data.recent_work_items.forEach(workItem => {
+                    const associatedPrs = workItem.associated_prs || [];
+                    associatedPrs.forEach(item => {
+                        if (item.relation_type === 'commit') {
+                            allItems.push({
+                                type: 'commit',
+                                title: `Commit ${item.commit_id ? item.commit_id.substring(0, 8) : 'N/A'}`,
+                                url: item.url || '#',
+                                repository: item.repository || 'Unknown',
+                                date: workItem.fields?.['System.ChangedDate'] || workItem.fields?.['System.CreatedDate'],
+                                work_item_title: workItem.fields?.['System.Title'] || '',
+                                author: 'Unknown'
+                            });
+                        } else if (item.relation_type === 'pr') {
+                            // Add PRs from work items too
+                            allItems.push({
+                                type: 'pr',
+                                title: `PR #${item.pr_number || 'N/A'}`,
+                                url: item.url || '#',
+                                repository: item.repository || 'Unknown',
+                                date: workItem.fields?.['System.ChangedDate'] || workItem.fields?.['System.CreatedDate'],
+                                work_item_title: workItem.fields?.['System.Title'] || '',
+                                author: 'Unknown'
+                            });
+                        }
+                    });
+                });
+            }
+            
+            // Sort by date (most recent first) and limit to 10
+            allItems.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
+            allItems = allItems.slice(0, 10);
+            
+            console.log(`📊 Displaying ${allItems.length} recent PRs and commits`);
+            
+            if (allItems.length === 0) {
+                container.innerHTML = '<div class="alert alert-info">No recent pull requests or commits found.</div>';
+                return;
+            }
+            
+            allItems.forEach(item => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'card mb-2';
                 
-                const resultClass = build.result === 'succeeded' ? 'success' : 
-                                  build.result === 'failed' ? 'danger' : 'warning';
+                const badgeClass = item.type === 'pr' ? 'bg-success' : 'bg-info';
+                const badgeText = item.type === 'pr' ? 'PR' : 'Commit';
+                const icon = item.type === 'pr' ? 'fas fa-code-branch' : 'fas fa-commit';
                 
-                buildDiv.innerHTML = `
+                itemDiv.innerHTML = `
                     <div class="card-body p-2">
                         <div class="row">
                             <div class="col-8">
                                 <h6 class="card-title mb-1">
-                                    <a href="${build._links?.web?.href || '#'}" target="_blank" class="text-decoration-none">
-                                        ${build.definition?.name || 'Unknown Build'}
+                                    <i class="${icon} me-1"></i>
+                                    <a href="${item.url}" target="_blank" class="text-decoration-none">
+                                        ${item.title}
                                     </a>
                                 </h6>
-                                <small class="text-muted">Build #${build.id}</small>
+                                <small class="text-muted">Repository: ${item.repository}</small>
+                                ${item.work_item_title ? `<br><small class="text-muted">Work Item: ${item.work_item_title}</small>` : ''}
                             </div>
                             <div class="col-4 text-end">
-                                <span class="badge bg-${resultClass}">${build.result || 'Unknown'}</span>
+                                <span class="badge ${badgeClass}">${badgeText}</span>
+                                <br>
+                                <small class="text-muted">${new Date(item.date || Date.now()).toLocaleDateString()}</small>
                             </div>
                         </div>
                     </div>
                 `;
-                container.appendChild(buildDiv);
+                container.appendChild(itemDiv);
             });
         }
+        
+
 
         // Figma Analytics Functions
         let figmaConfigured = false;
@@ -2648,7 +3812,9 @@
             }
         });
     </script>
+                </div> <!-- End analyticsContent -->
+            </div> <!-- End main-content -->
+        </div> <!-- End row -->
+    </div> <!-- End container-fluid -->
 </body>
-</html>
-
 </html>

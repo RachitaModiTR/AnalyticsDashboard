@@ -816,6 +816,30 @@ def get_azuredevops_work_items():
             'message': 'Failed to fetch work items'
         }), 500
 
+@app.route('/api/azuredevops/workitems-summary')
+def get_azuredevops_workitems_summary():
+    """API endpoint to get Azure DevOps work items summary with analytics (no PR data)"""
+    days = request.args.get('days', 30, type=int)
+    org = request.args.get('org', '')
+    project = request.args.get('project', '')
+    area_path = request.args.get('area_path', '')
+    
+    # Validate required parameters
+    if not org or not project:
+        return jsonify({
+            'status': 'error',
+            'message': 'Organization and project name are required'
+        }), 400
+    
+    # Update the Azure DevOps analytics instance with user-provided values
+    azuredevops_analytics.organization = org
+    azuredevops_analytics.project = project
+    azuredevops_analytics.area_path = area_path
+    
+    # Get work items only summary (fast loading)
+    result = azuredevops_analytics.get_workitems_only_summary(days)
+    return jsonify(result)
+
 @app.route('/api/azuredevops/pullrequests')
 def get_azuredevops_pull_requests():
     """API endpoint to get Azure DevOps pull requests"""
