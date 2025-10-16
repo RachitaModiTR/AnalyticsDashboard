@@ -156,7 +156,179 @@
             border-bottom: 2px solid var(--tr-orange);
             margin-bottom: 24px;
         }
+        /* Datadog Theme - Matching Existing Dashboard Style */
+        .datadog-info {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
         
+        .datadog-search-container {
+            background: #f3e5f5;
+            border-left: 4px solid #9c27b0;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+        
+        .datadog-stats-container {
+            background: #e8f5e8;
+            border-left: 4px solid #4caf50;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+        
+        .datadog-logs-container {
+            background: #fff3e0;
+            border-left: 4px solid #ff9800;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+        
+        .datadog-info h5,
+        .datadog-search-container h5,
+        .datadog-stats-container h4,
+        .datadog-logs-container h4 {
+            color: #333;
+            margin-bottom: 15px;
+            font-weight: 600;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .datadog-info h5 i {
+            color: #2196f3;
+        }
+        
+        .datadog-search-container h5 i {
+            color: #9c27b0;
+        }
+        
+        .datadog-stats-container h4 i {
+            color: #4caf50;
+        }
+        
+        .datadog-logs-container h4 i {
+            color: #ff9800;
+        }
+        
+        .datadog-info p {
+            margin-bottom: 8px;
+            color: #555;
+        }
+        
+        .datadog-info span {
+            font-weight: 500;
+            color: #2196f3;
+        }
+        
+        .datadog-search-container .form-label {
+            color: #333;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+        
+        .datadog-search-container .form-control,
+        .datadog-search-container .form-select {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 8px 12px;
+            transition: all 0.3s ease;
+        }
+        
+        .datadog-search-container .form-control:focus,
+        .datadog-search-container .form-select:focus {
+            border-color: #9c27b0;
+            box-shadow: 0 0 0 0.2rem rgba(156, 39, 176, 0.25);
+        }
+        
+        .datadog-search-container .btn-primary {
+            background: #9c27b0;
+            border: none;
+            color: white;
+            border-radius: 4px;
+            padding: 8px 16px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .datadog-search-container .btn-primary:hover {
+            background: #7b1fa2;
+        }
+        
+        .datadog-stats-container .card {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+        
+        .datadog-stats-container .card:hover {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .datadog-stats-container .card-body {
+            color: #333;
+            padding: 15px;
+        }
+        
+        .datadog-stats-container .badge {
+            background: #4caf50;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+        
+        .datadog-logs-container .table {
+            background: white;
+            border-radius: 4px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .datadog-logs-container .table thead th {
+            background: #ff9800;
+            color: white;
+            border: none;
+            font-weight: 600;
+            padding: 12px;
+        }
+        
+        .datadog-logs-container .table tbody tr {
+            transition: all 0.3s ease;
+        }
+        
+        .datadog-logs-container .table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .datadog-logs-container .table tbody td {
+            padding: 10px 12px;
+            border: none;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .datadog-logs-container .badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-weight: 500;
+            font-size: 0.75rem;
+        }
+        .datadog-logs-container .alert {
+            border: none;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
         .nav-tabs .nav-link {
             color: var(--tr-gray-medium);
             font-weight: 500;
@@ -517,93 +689,90 @@
         </div>
     </div>
 
+    <!-- Welcome Modal -->
+    <div class="modal fade" id="welcomeModal" tabindex="-1" aria-labelledby="welcomeModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="welcomeModalLabel">
+                        <i class="fas fa-building"></i> Thomson Reuters Project Setup
+                    </h5>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center mb-4">
+                        <i class="fab fa-microsoft fa-3x mb-3" style="color: var(--tr-orange);"></i>
+                        <h4 style="color: var(--tr-dark-blue);">Azure DevOps Configuration</h4>
+                        <p class="text-muted">Configure your project settings to start analyzing your development metrics</p>
+                    </div>
+                    
+                    <form id="projectSetupForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="setupOrgName" class="form-label">
+                                        <i class="fas fa-building"></i> Organization Name
+                                    </label>
+                                    <input type="text" class="form-control" id="setupOrgName" placeholder="e.g., tr-tax" required>
+                                    <div class="form-text">Your Azure DevOps organization name</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="setupProjectName" class="form-label">
+                                        <i class="fas fa-project-diagram"></i> Project Name
+                                    </label>
+                                    <input type="text" class="form-control" id="setupProjectName" placeholder="e.g., TaxProf" required>
+                                    <div class="form-text">Your Azure DevOps project name</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="mb-3">
+                                    <label for="setupAreaPath" class="form-label">
+                                        <i class="fas fa-sitemap"></i> Area Path
+                                    </label>
+                                    <input type="text" class="form-control" id="setupAreaPath" placeholder="e.g., TaxProf\\us\\taxAuto\\ADGE\\Prep">
+                                    <div class="form-text">Area path to filter work items (optional)</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="setupTimeRange" class="form-label">
+                                        <i class="fas fa-calendar-alt"></i> Time Range
+                                    </label>
+                                    <select class="form-select" id="setupTimeRange">
+                                        <option value="7">Last 7 days</option>
+                                        <option value="30" selected>Last 30 days</option>
+                                        <option value="90">Last 90 days</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            <strong>Note:</strong> Make sure you have a valid Azure DevOps Personal Access Token (PAT) configured in the system. You can update these settings later from the Azure DevOps tab.
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" onclick="skipSetup()">
+                        <i class="fas fa-times"></i> Skip Setup
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="saveProjectSetup()">
+                        <i class="fas fa-save"></i> Save & Continue
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="container-fluid">
         <div class="row">
             <!-- Sidebar -->
             <div class="col-md-3 sidebar">
-                <!-- Datadog Configuration -->
-                <div id="datadog-sidebar">
-                    <h5><i class="fas fa-chart-line"></i> Datadog Configuration</h5>
-                    
-                    <div class="client-token-info">
-                        <small><strong>Authentication:</strong> Application Key</small><br>
-                        <small><strong>Site:</strong> {{ site }}</small><br>
-                        <small><strong>API Key:</strong> {{ api_key[:8] }}...</small>
-                    </div>
-                    
-                    <div class="metric-selector">
-                        <h6>Select Metrics</h6>
-                        <small class="text-muted mb-2 d-block">Choose one or more metrics to analyze:</small>
-                        <div id="metrics-list">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" value="system.cpu.user" id="cpu">
-                                <label class="form-check-label" for="cpu">
-                                    CPU Usage
-                                </label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" value="system.mem.used" id="memory">
-                                <label class="form-check-label" for="memory">
-                                    Memory Usage
-                                </label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" value="system.disk.used" id="disk">
-                                <label class="form-check-label" for="disk">
-                                    Disk Usage
-                                </label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" value="system.load.1" id="load">
-                                <label class="form-check-label" for="load">
-                                    System Load
-                                </label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" value="aws.ec2.cpuutilization" id="ec2-cpu">
-                                <label class="form-check-label" for="ec2-cpu">
-                                    AWS EC2 CPU
-                                </label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" value="docker.cpu.usage" id="docker-cpu">
-                                <label class="form-check-label" for="docker-cpu">
-                                    Docker CPU
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="metric-selector">
-                        <h6>Time Range</h6>
-                        <select class="form-select" id="time-range">
-                            <option value="1">Last 1 hour</option>
-                            <option value="6">Last 6 hours</option>
-                            <option value="24" selected>Last 24 hours</option>
-                            <option value="168">Last 7 days</option>
-                        </select>
-                    </div>
-
-                    <div class="metric-selector">
-                        <h6>Chart Type</h6>
-                        <select class="form-select" id="chart-type">
-                            <option value="line" selected>Line Chart</option>
-                            <option value="bar">Bar Chart</option>
-                        </select>
-                    </div>
-
-                    <div class="metric-selector">
-                        <h6>Custom Metric</h6>
-                        <input type="text" class="form-control mb-2" id="custom-metric" placeholder="Enter metric name">
-                        <button class="btn btn-outline-primary btn-sm" onclick="addCustomMetric()">
-                            <i class="fas fa-plus"></i> Add Metric
-                        </button>
-                    </div>
-
-                    <button class="btn btn-primary w-100" onclick="updateDashboard()">
-                        <i class="fas fa-sync"></i> Update Dashboard
-                    </button>
-                </div>
 
                 <!-- GitHub Configuration -->
                 <div id="github-sidebar" style="display: none;">
@@ -675,8 +844,6 @@
                 </div>
 
                 <!-- Azure DevOps Configuration -->
-                <div id="azuredevops-sidebar" style="display: block;">  <!-- Show by default since Azure DevOps is active tab -->
-                    <h5><i class="fab fa-microsoft"></i> Azure DevOps Project Setup</h5>
                 <div id="azuredevops-sidebar" style="display: block;">  <!-- Show by default since Azure DevOps is active tab -->
                     <h5><i class="fab fa-microsoft"></i> Azure DevOps Project Setup</h5>
                     
@@ -873,7 +1040,7 @@
                 <div class="row mb-4">
                     <div class="col-12">
                         <h2><i class="fas fa-tachometer-alt"></i> Analytics Overview</h2>
-                        <p class="text-muted">Datadog Metrics (Application Key), GitHub Pull Requests, Azure DevOps & Figma Analytics</p>
+                        <p class="text-muted">GitHub Pull Requests, Azure DevOps & Figma Analytics</p>
                     </div>
                 </div>
 
@@ -885,15 +1052,8 @@
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="datadog-tab" data-bs-toggle="tab" data-bs-target="#datadog-pane" type="button" role="tab">
-                            <i class="fas fa-chart-line"></i> Datadog Metrics
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="datadog-logs-tab" data-bs-toggle="tab" data-bs-target="#datadog-logs-pane" type="button" role="tab">
-                            <i class="fas fa-file-alt"></i> Datadog Logs
-                        <button class="nav-link" id="datadog-logs-tab" data-bs-toggle="tab" data-bs-target="#datadog-logs-pane" type="button" role="tab">
-                            <i class="fas fa-file-alt"></i> Datadog Logs
+                        <button class="nav-link" id="github-tab" data-bs-toggle="tab" data-bs-target="#github-pane" type="button" role="tab">
+                            <i class="fab fa-github"></i> GitHub Pull Requests
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
@@ -901,183 +1061,19 @@
                             <i class="fab fa-figma"></i> Figma
                         </button>
                     </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="datadog-logs-tab" data-bs-toggle="tab" data-bs-target="#datadog-pane" type="button" role="tab">
+                            <i class="fas fa-file-alt"></i> Datadog Logs
+                        </button>
+                    </li>
                 </ul>
 
                 <!-- Tab Content -->
                 <div class="tab-content" id="analyticsTabContent">
-                    <!-- Datadog Tab -->
-                    <div class="tab-pane fade" id="datadog-pane" role="tabpanel">
-                    <div class="tab-pane fade" id="datadog-pane" role="tabpanel">
 
-                <!-- Metrics Summary Cards -->
-                <div class="row mb-4" id="metrics-summary">
-                    <!-- Dynamic content will be loaded here -->
-                </div>
 
-                <!-- Charts Section -->
-                <div class="row">
-                    <div class="col-12">
-                        <h4><i class="fas fa-chart-area"></i> Metrics Visualization</h4>
-                    </div>
-                </div>
 
-                <div id="charts-container">
-                    <!-- Dynamic charts will be loaded here -->
-                </div>
-                    </div>
 
-                    <!-- Datadog Logs Tab -->
-                    <div class="tab-pane fade" id="datadog-logs-pane" role="tabpanel">
-                        <!-- Logs Summary Cards -->
-                        <div class="row mb-4" id="logs-summary">
-                            <!-- Dynamic content will be loaded here -->
-                        </div>
-
-                        <!-- Logs Search and Filters -->
-                        <div class="row mb-4">
-                            <div class="col-12">
-                                <div class="card">
-                                    <div class="card-header">
-                                        <h5><i class="fas fa-search"></i> Logs Search & Filters</h5>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="row">
-                                            <div class="col-md-3">
-                                                <label for="logs-time-range" class="form-label">Time Range</label>
-                                                <select class="form-select" id="logs-time-range">
-                                                    <option value="1">Last 1 Hour</option>
-                                                    <option value="6">Last 6 Hours</option>
-                                                    <option value="24" selected>Last 24 Hours</option>
-                                                    <option value="168">Last 7 Days</option>
-                                                </select>
-                                            </div>
-                                            <div class="col-md-3">
-                                                <label for="logs-service-filter" class="form-label">Service</label>
-                                                <select class="form-select" id="logs-service-filter">
-                                                    <option value="">All Services</option>
-                                                    <!-- Dynamic services will be loaded here -->
-                                                </select>
-                                            </div>
-                                            <div class="col-md-3">
-                                                <label for="logs-level-filter" class="form-label">Log Level</label>
-                                                <select class="form-select" id="logs-level-filter">
-                                                    <option value="">All Levels</option>
-                                                    <option value="error">Error</option>
-                                                    <option value="warning">Warning</option>
-                                                    <option value="info">Info</option>
-                                                    <option value="debug">Debug</option>
-                                                </select>
-                                            </div>
-                                            <div class="col-md-3">
-                                                <label for="logs-search-query" class="form-label">Search Query</label>
-                                                <input type="text" class="form-control" id="logs-search-query" placeholder="Enter search terms...">
-                                            </div>
-                                        </div>
-                                        <div class="row mt-3">
-                                            <div class="col-12">
-                                                <button class="btn btn-primary" onclick="searchLogs()">
-                                                    <i class="fas fa-search"></i> Search Logs
-                                                </button>
-                                                <button class="btn btn-secondary" onclick="refreshLogsSummary()">
-                                                    <i class="fas fa-sync"></i> Refresh Summary
-                                                </button>
-                                                <button class="btn btn-info" onclick="loadAllLogs()">
-                                                    <i class="fas fa-list"></i> Load All Logs
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Logs List -->
-                        <div class="row">
-                            <div class="col-12">
-                                <div class="card">
-                                    <div class="card-header">
-                                        <h5><i class="fas fa-list"></i> Recent Logs</h5>
-                                    </div>
-                                    <div class="card-body">
-                                        <div id="logs-list">
-                                            <!-- Dynamic logs will be loaded here -->
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Datadog Dashboards Tab -->
-                    <div class="tab-pane fade" id="datadog-dashboards-pane" role="tabpanel">
-                        <!-- Dashboard Summary Cards -->
-                        <div class="row mb-4" id="dashboards-summary">
-                            <!-- Dynamic content will be loaded here -->
-                        </div>
-
-                        <!-- Dashboard Actions -->
-                        <div class="row mb-4">
-                            <div class="col-12">
-                                <div class="card">
-                                    <div class="card-header">
-                                        <h5><i class="fas fa-cog"></i> Dashboard Management</h5>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="row">
-                                            <div class="col-md-6">
-                                                <button class="btn btn-primary" onclick="loadAllDashboards()">
-                                                    <i class="fas fa-sync"></i> Refresh Dashboards
-                                                </button>
-                                                <button class="btn btn-info" onclick="loadDashboardDetails()">
-                                                    <i class="fas fa-info-circle"></i> Load Dashboard Details
-                                                </button>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <div class="input-group">
-                                                    <input type="text" class="form-control" id="dashboard-id-input" placeholder="Enter Dashboard ID">
-                                                    <button class="btn btn-outline-secondary" onclick="loadSpecificDashboard()">
-                                                        <i class="fas fa-search"></i> Load Dashboard
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Dashboard List -->
-                        <div class="row">
-                            <div class="col-12">
-                                <div class="card">
-                                    <div class="card-header">
-                                        <h5><i class="fas fa-list"></i> Available Dashboards</h5>
-                                    </div>
-                                    <div class="card-body">
-                                        <div id="dashboards-list">
-                                            <!-- Dynamic dashboards will be loaded here -->
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Dashboard Details -->
-                        <div class="row mt-4">
-                            <div class="col-12">
-                                <div class="card">
-                                    <div class="card-header">
-                                        <h5><i class="fas fa-info-circle"></i> Dashboard Details</h5>
-                                    </div>
-                                    <div class="card-body">
-                                        <div id="dashboard-details">
-                                            <!-- Dynamic dashboard details will be loaded here -->
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
 
                     <!-- GitHub Tab -->
                     <div class="tab-pane fade" id="github-pane" role="tabpanel">
@@ -1110,7 +1106,6 @@
                     </div>
 
                     <!-- Azure DevOps Tab -->
-                    <div class="tab-pane fade show active" id="azuredevops-pane" role="tabpanel">
                     <div class="tab-pane fade show active" id="azuredevops-pane" role="tabpanel">
 
                         <!-- Azure DevOps Analytics Summary -->
@@ -1193,58 +1188,87 @@
                         </div>
                     </div>
 
-                    <!-- Chatbot Tab Removed - Now using floating widget -->
-                </div>
-            </div>
-        </div>
-    </div>
+                    <!-- Datadog Logs Tab -->
+                    <div class="tab-pane fade" id="datadog-pane" role="tabpanel">
 
-    <!-- Datadog Dashboards Tab Content -->
-    <div class="tab-pane fade" id="datadog-dashboards-pane" role="tabpanel">
-        <div class="container-fluid">
-            <div class="row">
-                <!-- Sidebar for Dashboards -->
-                <div class="col-md-3 sidebar" id="dashboards-sidebar">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5><i class="fas fa-tachometer-alt"></i> Dashboard Controls</h5>
+                        <!-- Datadog Configuration Info -->
+                        <div class="datadog-info">
+                            <h5><i class="fas fa-cog fa-spin"></i> Datadog Configuration</h5>
+                            <p><strong><i class="fas fa-globe"></i> Site:</strong> <span id="datadog-site">datadoghq.com</span></p>
+                            <p><strong><i class="fas fa-check-circle"></i> Status:</strong> <span id="datadog-status">Ready</span></p>
                         </div>
-                        <div class="card-body">
-                            <div class="mb-3">
-                                <button class="btn btn-primary w-100" onclick="loadDashboardsSummary()">
-                                    <i class="fas fa-sync"></i> Load Dashboards
-                                </button>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Dashboard Filter</label>
-                                <input type="text" class="form-control" id="dashboard-search" placeholder="Search dashboards...">
-                            </div>
-                            <div class="mb-3">
-                                <button class="btn btn-info w-100" onclick="filterDashboards()">
-                                    <i class="fas fa-search"></i> Filter
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
 
-                <!-- Main Content for Dashboards -->
-                <div class="col-md-9">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5><i class="fas fa-tachometer-alt"></i> Datadog Dashboards</h5>
-                        </div>
-                        <div class="card-body">
-                            <!-- Dashboard Summary Cards -->
-                            <div id="dashboards-summary" class="row mb-4">
-                                <!-- Summary cards will be loaded here -->
+                        <!-- Log Search Controls -->
+                        <div class="datadog-search-container">
+                            <h5><i class="fas fa-search"></i> Log Search</h5>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <label for="datadog-query" class="form-label">Search Query</label>
+                                    <input type="text" class="form-control" id="datadog-query" placeholder="*" value="*">
+                                </div>
+                                <div class="col-md-2">
+                                    <label for="datadog-service" class="form-label">Service</label>
+                                    <select class="form-select" id="datadog-service">
+                                        <option value="">All Services</option>
+                                        <!-- Services will be populated dynamically -->
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <label for="datadog-level" class="form-label">Level</label>
+                                    <select class="form-select" id="datadog-level">
+                                        <option value="">All Levels</option>
+                                        <option value="ERROR">ERROR</option>
+                                        <option value="WARN">WARN</option>
+                                        <option value="INFO">INFO</option>
+                                        <option value="DEBUG">DEBUG</option>
+                                        <option value="TRACE">TRACE</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <label for="datadog-hours" class="form-label">Hours Back</label>
+                                    <select class="form-select" id="datadog-hours">
+                                        <option value="1">1 hour</option>
+                                        <option value="6">6 hours</option>
+                                        <option value="24" selected>24 hours</option>
+                                        <option value="72">3 days</option>
+                                        <option value="168">7 days</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <label for="datadog-limit" class="form-label">Limit</label>
+                                    <select class="form-select" id="datadog-limit">
+                                        <option value="50">50</option>
+                                        <option value="100" selected>100</option>
+                                        <option value="500">500</option>
+                                        <option value="1000">1000</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-1 d-flex align-items-end">
+                                    <button class="btn btn-primary" onclick="searchDatadogLogs()">
+                                        <i class="fas fa-search"></i>
+                                    </button>
+                                </div>
                             </div>
+                        </div>
 
-                            <!-- Dashboard List -->
-                            <div id="dashboards-list">
-                                <div class="text-center">
-                                    <i class="fas fa-tachometer-alt fa-3x text-muted mb-3"></i>
-                                    <p class="text-muted">Click "Load Dashboards" to view your Datadog dashboards</p>
+                        <!-- Log Statistics -->
+                        <div class="datadog-stats-container">
+                            <h4><i class="fas fa-chart-bar"></i> Log Statistics</h4>
+                            <div id="datadog-stats-container">
+                                <!-- Dynamic statistics will be loaded here -->
+                            </div>
+                        </div>
+
+                        <!-- Logs Results -->
+                        <div class="datadog-logs-container">
+                            <h4><i class="fas fa-list"></i> Log Entries</h4>
+                            <div id="datadog-logs-container">
+                                <div class="text-center" style="padding: 40px; color: #666;">
+                                    <div style="background: #ff9800; width: 70px; height: 70px; border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(255, 152, 0, 0.3);">
+                                        <i class="fas fa-search fa-2x" style="color: white;"></i>
+                                    </div>
+                                    <h5 style="color: #333; margin-bottom: 10px; font-weight: 600;">Ready to Search</h5>
+                                    <p>Click the search button to fetch logs from Datadog</p>
                                 </div>
                             </div>
                         </div>
@@ -1253,6 +1277,7 @@
             </div>
         </div>
     </div>
+
 
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -3834,6 +3859,330 @@
             if (datadogDashboardsTab) {
                 datadogDashboardsTab.addEventListener('click', function() {
                     loadAllDashboards();
+                });
+            }
+        });
+
+        // Datadog Logs Functions
+        async function searchDatadogLogs() {
+            try {
+                const query = document.getElementById('datadog-query').value || '*';
+                const service = document.getElementById('datadog-service').value || '';
+                const level = document.getElementById('datadog-level').value || '';
+                const hours = document.getElementById('datadog-hours').value || 24;
+                const limit = document.getElementById('datadog-limit').value || 100;
+                
+                // Show loading state
+                const container = document.getElementById('datadog-logs-container');
+                container.innerHTML = `
+                    <div class="text-center" style="padding: 40px;">
+                        <div style="background: #ff9800; width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(255, 152, 0, 0.3);">
+                            <i class="fas fa-spinner fa-spin fa-2x" style="color: white;"></i>
+                        </div>
+                        <h5 style="color: #333; margin-bottom: 10px; font-weight: 600;">Searching Logs...</h5>
+                        <p style="color: #666;">Fetching data from Datadog</p>
+                    </div>
+                `;
+                
+                // Build query parameters
+                const params = new URLSearchParams({
+                    query: query,
+                    hours: hours,
+                    limit: limit
+                });
+                
+                if (service) {
+                    params.append('service', service);
+                }
+                
+                if (level) {
+                    params.append('level', level);
+                }
+                
+                const response = await fetch(`/api/datadog/logs?${params}`);
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    displayDatadogLogs(result.data);
+                    // Also fetch and display statistics
+                    await loadDatadogStats(query, service, level, hours);
+                } else {
+                    container.innerHTML = `
+                        <div class="alert alert-danger" style="background: #ffebee; border: 1px solid #f44336; color: #c62828; border-radius: 4px; padding: 15px;">
+                            <i class="fas fa-exclamation-triangle fa-lg" style="color: #f44336;"></i>
+                            <strong>Error: ${result.message}</strong>
+                        </div>
+                    `;
+                }
+                
+            } catch (error) {
+                console.error('Error searching Datadog logs:', error);
+                document.getElementById('datadog-logs-container').innerHTML = `
+                    <div class="alert alert-danger" style="background: #ffebee; border: 1px solid #f44336; color: #c62828; border-radius: 4px; padding: 15px;">
+                        <i class="fas fa-exclamation-triangle fa-lg" style="color: #f44336;"></i>
+                        <strong>Error: ${error.message}</strong>
+                    </div>
+                `;
+            }
+        }
+        
+        function displayDatadogLogs(logs) {
+            const container = document.getElementById('datadog-logs-container');
+            
+            if (!logs || logs.length === 0) {
+                container.innerHTML = `
+                    <div class="alert alert-info" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); border: none; color: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);">
+                        <i class="fas fa-info-circle fa-lg"></i>
+                        <strong>No logs found for the specified criteria.</strong>
+                    </div>
+                `;
+                return;
+            }
+            
+           let html = `
+               <div class="alert alert-success" style="background: #e8f5e8; border: 1px solid #4caf50; color: #2e7d32; border-radius: 4px; padding: 15px; margin-bottom: 20px;">
+                   <i class="fas fa-check-circle fa-lg" style="color: #4caf50;"></i>
+                   <strong>Found ${logs.length} unique log entries</strong>
+                   ${logs.length < 10 ? '<br><small>Showing all available logs for the selected criteria</small>' : ''}
+               </div>
+                ${logs.length < 5 ? `
+                <div class="alert alert-info" style="background: #e3f2fd; border: 1px solid #2196f3; color: #1565c0; border-radius: 4px; padding: 15px; margin-bottom: 20px;">
+                    <i class="fas fa-info-circle" style="color: #2196f3;"></i>
+                    <strong>Low Log Volume:</strong> Only ${logs.length} unique logs found. Try expanding the time range or removing service filters to see more logs.
+                </div>
+                ` : ''}
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>Service</th>
+                                <th>Level</th>
+                                <th>Message</th>
+                                <th>Source</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
+            logs.forEach(log => {
+                const timestamp = new Date(log.timestamp).toLocaleString();
+                const service = log.service || 'N/A';
+                const level = log.level || 'INFO';
+                const message = log.message || 'No message';
+                const source = log.source || 'N/A';
+                
+                // Truncate long messages
+                const truncatedMessage = message.length > 200 ? message.substring(0, 200) + '...' : message;
+                
+                html += `
+                    <tr>
+                        <td><small>${timestamp}</small></td>
+                        <td><span class="badge bg-primary">${service}</span></td>
+                        <td><span class="badge bg-${getLevelColor(level)}">${level}</span></td>
+                        <td><small>${truncatedMessage}</small></td>
+                        <td><small>${source}</small></td>
+                    </tr>
+                `;
+            });
+            
+            html += `
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            
+            container.innerHTML = html;
+        }
+        
+        function getLevelColor(level) {
+            switch (level.toUpperCase()) {
+                case 'ERROR': return 'danger';
+                case 'WARN': return 'warning';
+                case 'INFO': return 'info';
+                case 'DEBUG': return 'secondary';
+                default: return 'light';
+            }
+        }
+        
+        async function loadDatadogStats(query, service, level, hours) {
+            try {
+                const params = new URLSearchParams({
+                    query: query,
+                    hours: hours
+                });
+                
+                if (service) {
+                    params.append('service', service);
+                }
+                
+                if (level) {
+                    params.append('level', level);
+                }
+                
+                const response = await fetch(`/api/datadog/logs/stats?${params}`);
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    displayDatadogStats(result.data);
+                }
+                
+            } catch (error) {
+                console.error('Error loading Datadog stats:', error);
+            }
+        }
+        
+        function displayDatadogStats(stats) {
+            const container = document.getElementById('datadog-stats-container');
+            
+            if (!stats) {
+                container.innerHTML = '<p class="text-muted">No statistics available</p>';
+                return;
+            }
+            
+            let html = `
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                <h5 class="card-title text-primary">${stats.total_logs || 0}</h5>
+                                <p class="card-text">Total Logs</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                <h5 class="card-title text-info">${stats.unique_services || 0}</h5>
+                                <p class="card-text">Services</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                <h5 class="card-title text-warning">${stats.error_count || 0}</h5>
+                                <p class="card-text">Errors</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                <h5 class="card-title text-success">${stats.warning_count || 0}</h5>
+                                <p class="card-text">Warnings</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            if (stats.services && stats.services.length > 0) {
+                html += `
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h5>Logs by Service</h5>
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Service</th>
+                                            <th>Count</th>
+                                            <th>Percentage</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                `;
+                
+                stats.services.forEach(service => {
+                    const percentage = stats.total_logs > 0 ? ((service.count / stats.total_logs) * 100).toFixed(1) : 0;
+                    html += `
+                        <tr>
+                            <td>${service.name}</td>
+                            <td>${service.count}</td>
+                            <td>${percentage}%</td>
+                        </tr>
+                    `;
+                });
+                
+                html += `
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            container.innerHTML = html;
+        }
+        
+        // Load available services
+        async function loadDatadogServices() {
+            try {
+                const hours = document.getElementById('datadog-hours').value || 24;
+                const response = await fetch(`/api/datadog/services?hours=${hours}`);
+                const result = await response.json();
+                
+                const serviceSelect = document.getElementById('datadog-service');
+                
+                if (result.status === 'success' && result.data.length > 0) {
+                    // Clear existing options except "All Services"
+                    serviceSelect.innerHTML = '<option value="">All Services</option>';
+                    
+                    // Add service options
+                    result.data.forEach(service => {
+                        const option = document.createElement('option');
+                        option.value = service;
+                        option.textContent = service;
+                        serviceSelect.appendChild(option);
+                    });
+                    
+                    console.log(`Loaded ${result.data.length} services from Datadog`);
+                } else {
+                    serviceSelect.innerHTML = '<option value="">No services found</option>';
+                }
+                
+            } catch (error) {
+                console.error('Error loading services:', error);
+                const serviceSelect = document.getElementById('datadog-service');
+                serviceSelect.innerHTML = '<option value="">Error loading services</option>';
+            }
+        }
+        
+        // Test Datadog connection on tab load
+        document.addEventListener('DOMContentLoaded', function() {
+            const datadogTab = document.getElementById('datadog-logs-tab');
+            if (datadogTab) {
+                datadogTab.addEventListener('click', async function() {
+                    // Test connection when tab is first clicked
+                    try {
+                        const response = await fetch('/api/datadog/test');
+                        const result = await response.json();
+                        
+                        const statusElement = document.getElementById('datadog-status');
+                        if (result.status === 'success') {
+                            statusElement.textContent = 'Connected';
+                            statusElement.className = 'text-success';
+                            
+                            // Load services when connection is successful
+                            await loadDatadogServices();
+                        } else {
+                            statusElement.textContent = 'Connection Failed';
+                            statusElement.className = 'text-danger';
+                        }
+                    } catch (error) {
+                        document.getElementById('datadog-status').textContent = 'Connection Error';
+                        document.getElementById('datadog-status').className = 'text-danger';
+                    }
+                });
+            }
+            
+            // Reload services when hours selection changes
+            const hoursSelect = document.getElementById('datadog-hours');
+            if (hoursSelect) {
+                hoursSelect.addEventListener('change', function() {
+                    loadDatadogServices();
                 });
             }
         });

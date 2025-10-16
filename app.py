@@ -1,13 +1,13 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 from flask import Flask, render_template, jsonify, request
 from dotenv import load_dotenv
 import requests
 from config import Config
-from datadog_analytics import DatadogApplicationKeyAnalytics
 from github_analytics import GitHubPullRequestAnalytics
 from azuredevops_analytics import AzureDevOpsAnalytics
 from figma_analytics import FigmaAnalytics
 from chatbot_analytics import ChatbotAnalytics
+from datadog_analytics import DatadogApplicationKeyAnalytics
 
 # Load environment variables
 load_dotenv()
@@ -16,165 +16,20 @@ app = Flask(__name__)
 app.secret_key = Config.SECRET_KEY
 
 # Initialize analytics clients
-datadog_analytics = DatadogApplicationKeyAnalytics()
 github_analytics = GitHubPullRequestAnalytics()
 azuredevops_analytics = AzureDevOpsAnalytics()
 figma_analytics = FigmaAnalytics()
+datadog_analytics = DatadogApplicationKeyAnalytics()
 chatbot_analytics = ChatbotAnalytics()
 
 @app.route('/')
 def index():
     """Main dashboard page"""
-    return render_template('index.html',
-                         api_key=Config.DD_API_KEY,
-                         application_key=Config.DD_APPLICATION_KEY,
-                         site=Config.DD_SITE)
+    return render_template('index.html')
 
-@app.route('/api/metrics')
-def get_metrics():
-    """API endpoint to get available metrics"""
-    metrics = datadog_analytics.get_available_metrics()
-    return jsonify(metrics)
 
-@app.route('/api/metrics/<metric_name>')
-def get_metric_data(metric_name):
-    """API endpoint to get specific metric data"""
-    hours = request.args.get('hours', 24, type=int)
-    tags = request.args.get('tags', '')
-    
-    from_time = int((datetime.now() - timedelta(hours=hours)).timestamp())
-    to_time = int(datetime.now().timestamp())
-    
-    tag_list = [tag.strip() for tag in tags.split(',') if tag.strip()] if tags else None
-    
-    data = datadog_analytics.get_metrics_data(metric_name, from_time, to_time, tag_list)
-    
-    if data:
-        return jsonify({
-            'status': 'success',
-            'data': data
-        })
-    else:
-        return jsonify({
-            'status': 'error',
-            'message': 'Failed to fetch metric data'
-        }), 500
 
-@app.route('/api/analytics')
-def get_analytics():
-    """API endpoint to get analytics dashboard data"""
-    metric_names = request.args.getlist('metrics')
-    hours = request.args.get('hours', 24, type=int)
-    
-    if not metric_names:
-        return jsonify({
-            'status': 'error',
-            'message': 'No metrics specified'
-        }), 400
-    
-    from_time = int((datetime.now() - timedelta(hours=hours)).timestamp())
-    to_time = int(datetime.now().timestamp())
-    
-    all_metrics_data = []
-    for metric_name in metric_names:
-        data = datadog_analytics.get_metrics_data(metric_name, from_time, to_time)
-        if data and 'series' in data:
-            all_metrics_data.extend(data['series'])
-    
-    # Create a combined metrics data structure
-    combined_data = {
-        'series': all_metrics_data,
-        'from': from_time,
-        'to': to_time
-    }
-    
-    analytics_data = datadog_analytics.create_analytics_dashboard(combined_data)
-    
-    # If no real data available, generate sample data for demonstration
-    if not analytics_data or not analytics_data.get('metrics_summary'):
-        analytics_data = datadog_analytics._generate_sample_data(metric_names, hours)
-    
-    if analytics_data:
-        return jsonify({
-            'status': 'success',
-            'data': analytics_data
-        })
-    else:
-        return jsonify({
-            'status': 'error',
-            'message': 'Failed to create analytics data'
-        }), 500
 
-@app.route('/api/charts/<metric_name>')
-def get_chart_data(metric_name):
-    """API endpoint to get chart data for a specific metric"""
-    hours = request.args.get('hours', 24, type=int)
-    chart_type = request.args.get('type', 'line')
-    
-    chart_data = datadog_analytics.get_chart_data(metric_name, hours, chart_type)
-    
-    # If no real data available, generate sample chart data for demonstration
-    if not chart_data:
-        chart_data = datadog_analytics._generate_sample_chart_data(metric_name, hours, chart_type)
-    
-    if chart_data:
-        return jsonify({
-            'status': 'success',
-            'chart': chart_data
-        })
-    else:
-        return jsonify({
-            'status': 'error',
-            'message': 'No data available for chart'
-        }), 404
-
-@app.route('/api/datadog/dashboards')
-def get_all_dashboards():
-    """API endpoint to get all Datadog dashboards"""
-    data = datadog_analytics.get_all_dashboards()
-    
-    if data:
-        return jsonify({
-            'status': 'success',
-            'data': data
-        })
-    else:
-        return jsonify({
-            'status': 'error',
-            'message': 'Failed to fetch dashboards'
-        }), 500
-
-@app.route('/api/datadog/dashboards/<dashboard_id>')
-def get_dashboard_by_id(dashboard_id):
-    """API endpoint to get specific dashboard data by ID"""
-    data = datadog_analytics.get_dashboard_by_id(dashboard_id)
-    
-    if data:
-        return jsonify({
-            'status': 'success',
-            'data': data
-        })
-    else:
-        return jsonify({
-            'status': 'error',
-            'message': 'Failed to fetch dashboard data'
-        }), 500
-
-@app.route('/api/dashboard/<dashboard_id>')
-def get_dashboard(dashboard_id):
-    """API endpoint to get dashboard data (legacy endpoint)"""
-    data = datadog_analytics.get_dashboard_data(dashboard_id)
-    
-    if data:
-        return jsonify({
-            'status': 'success',
-            'data': data
-        })
-    else:
-        return jsonify({
-            'status': 'error',
-            'message': 'Failed to fetch dashboard data'
-        }), 500
 
 # GitHub Pull Request API Routes
 @app.route('/api/github/prs')
@@ -1116,164 +971,122 @@ def get_figma_chart():
             'message': 'No data available for Figma chart'
         }), 404
 
-# Datadog Logs API Routes
+# Datadog API Routes
 @app.route('/api/datadog/logs')
 def get_datadog_logs():
     """API endpoint to get Datadog logs"""
     query = request.args.get('query', '*')
-    hours = request.args.get('hours', 24, type=int)
-    limit = request.args.get('limit', 100, type=int)
-    service = request.args.get('service', None)
-    
-    from_time = int((datetime.now() - timedelta(hours=hours)).timestamp())
-    to_time = int(datetime.now().timestamp())
-    
-    logs_data = datadog_analytics.get_logs(query, from_time, to_time, limit, service)
-    
-    if logs_data:
-        return jsonify({
-            'status': 'success',
-            'data': logs_data
-        })
-    else:
-        return jsonify({
-            'status': 'error',
-            'message': 'Failed to fetch logs'
-        }), 500
-
-@app.route('/api/datadog/logs/summary')
-def get_datadog_logs_summary():
-    """API endpoint to get Datadog logs summary"""
-    hours = request.args.get('hours', 24, type=int)
-    
-    summary = datadog_analytics.get_logs_summary(hours)
-    
-    if summary:
-        return jsonify({
-            'status': 'success',
-            'data': summary
-        })
-    else:
-        return jsonify({
-            'status': 'error',
-            'message': 'Failed to fetch logs summary'
-        }), 500
-
-@app.route('/api/datadog/logs/search')
-def search_datadog_logs():
-    """API endpoint to search Datadog logs"""
-    query = request.args.get('q', '*')
-    hours = request.args.get('hours', 24, type=int)
-    limit = request.args.get('limit', 50, type=int)
     service = request.args.get('service', None)
     level = request.args.get('level', None)
+    hours = request.args.get('hours', 24, type=int)
+    limit = request.args.get('limit', 100, type=int)
     
-    # Build search query
-    search_query = query
-    if service:
-        search_query = f"service:{service} {search_query}"
-    if level:
-        search_query = f"level:{level} {search_query}"
-    
-    from_time = int((datetime.now() - timedelta(hours=hours)).timestamp())
-    to_time = int(datetime.now().timestamp())
-    
-    logs_data = datadog_analytics.get_logs(search_query, from_time, to_time, limit)
-    
-    if logs_data:
-        return jsonify({
-            'status': 'success',
-            'data': logs_data
-        })
-    else:
-        return jsonify({
-            'status': 'error',
-            'message': 'Failed to search logs'
-        }), 500
-
-@app.route('/api/datadog/services')
-def get_datadog_services():
-    """API endpoint to get available services from Datadog"""
-    services = datadog_analytics.get_available_services()
-    
-    return jsonify({
-        'status': 'success',
-        'data': services
-    })
-
-@app.route('/api/datadog/logs/send', methods=['POST'])
-def send_log_to_datadog():
-    """API endpoint to send a log entry to Datadog"""
     try:
-        data = request.get_json()
+        logs = datadog_analytics.get_logs(
+            query=query,
+            service=service,
+            level=level,
+            hours_back=hours,
+            limit=limit
+        )
         
-        message = data.get('message', '')
-        level = data.get('level', 'info')
-        service = data.get('service', 'analytics-dashboard')
-        host = data.get('host', None)
-        tags = data.get('tags', None)
-        
-        if not message:
-            return jsonify({
-                'status': 'error',
-                'message': 'Message is required'
-            }), 400
-        
-        success = datadog_analytics.send_log_to_datadog(message, level, service, host, tags)
-        
-        if success:
+        if logs is not None:
             return jsonify({
                 'status': 'success',
-                'message': 'Log sent successfully to Datadog'
+                'data': logs
             })
         else:
             return jsonify({
                 'status': 'error',
-                'message': 'Failed to send log to Datadog'
+                'message': 'Failed to fetch logs from Datadog'
             }), 500
             
     except Exception as e:
         return jsonify({
             'status': 'error',
-            'message': f'Error sending log: {str(e)}'
+            'message': f'Error fetching logs: {str(e)}'
         }), 500
 
-# Datadog Dashboards API Routes
-@app.route('/api/datadog/dashboards')
-def get_datadog_dashboards():
-    """API endpoint to get all Datadog dashboards"""
-    dashboards = datadog_analytics.get_all_dashboards()
+@app.route('/api/datadog/logs/stats')
+def get_datadog_log_stats():
+    """API endpoint to get Datadog log statistics"""
+    query = request.args.get('query', '*')
+    service = request.args.get('service', None)
+    level = request.args.get('level', None)
+    hours = request.args.get('hours', 24, type=int)
     
-    return jsonify({
-        'status': 'success',
-        'data': dashboards
-    })
-
-@app.route('/api/datadog/dashboards/summary')
-def get_datadog_dashboards_summary():
-    """API endpoint to get Datadog dashboards summary"""
-    summary = datadog_analytics.get_dashboard_summary()
-    
-    return jsonify({
-        'status': 'success',
-        'data': summary
-    })
-
-@app.route('/api/datadog/dashboards/<dashboard_id>')
-def get_datadog_dashboard(dashboard_id):
-    """API endpoint to get a specific dashboard by ID"""
-    dashboard = datadog_analytics.get_dashboard_by_id(dashboard_id)
-    
-    if dashboard:
-        return jsonify({
-            'status': 'success',
-            'data': dashboard
-        })
-    else:
+    try:
+        stats = datadog_analytics.get_log_statistics(
+            query=query,
+            service=service,
+            level=level,
+            hours_back=hours
+        )
+        
+        if stats is not None:
+            return jsonify({
+                'status': 'success',
+                'data': stats
+            })
+        else:
+            return jsonify({
+                'status': 'error',
+                'message': 'Failed to fetch log statistics from Datadog'
+            }), 500
+            
+    except Exception as e:
         return jsonify({
             'status': 'error',
-            'message': 'Dashboard not found or failed to fetch'
-        }), 404
+            'message': f'Error fetching log statistics: {str(e)}'
+        }), 500
+
+@app.route('/api/datadog/services')
+def get_datadog_services():
+    """API endpoint to get available services from Datadog logs"""
+    hours = request.args.get('hours', 24, type=int)
+    
+    try:
+        services = datadog_analytics.get_available_services(hours_back=hours)
+        
+        return jsonify({
+            'status': 'success',
+            'data': services
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': f'Error fetching services: {str(e)}'
+        }), 500
+
+@app.route('/api/datadog/test')
+def test_datadog_connection():
+    """Test endpoint to validate Datadog connection"""
+    try:
+        # Test with a simple query
+        test_logs = datadog_analytics.get_logs(query='*', limit=1)
+        
+        return jsonify({
+            'status': 'success',
+            'message': 'Datadog connection successful',
+            'config': {
+                'site': datadog_analytics.site,
+                'has_api_key': bool(datadog_analytics.api_key),
+                'has_application_key': bool(datadog_analytics.application_key)
+            },
+            'test_result': {
+                'logs_fetched': test_logs is not None,
+                'sample_count': len(test_logs) if test_logs else 0
+            }
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': f'Datadog connection failed: {str(e)}'
+        }), 500
+
+
 
 # Multi-repository GitHub analytics helper functions
 def get_multi_repo_analytics(repos, days):
