@@ -838,7 +838,7 @@
                         </select>
                     </div>
 
-                    <button class="btn btn-primary w-100" onclick="updateGitHubDashboard()">
+                    <button class="btn btn-primary w-100" id="github-update-btn" onclick="updateGitHubDashboard()">
                         <i class="fas fa-sync"></i> Update GitHub Analytics
                     </button>
                 </div>
@@ -1120,13 +1120,13 @@
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="figma-tab" data-bs-toggle="tab" data-bs-target="#figma-pane" type="button" role="tab">
-                            <i class="fab fa-figma"></i> Figma
+                        <button class="nav-link" id="datadog-logs-tab" data-bs-toggle="tab" data-bs-target="#datadog-pane" type="button" role="tab">
+                            <i class="fas fa-file-alt"></i> Datadog Logs
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="datadog-logs-tab" data-bs-toggle="tab" data-bs-target="#datadog-pane" type="button" role="tab">
-                            <i class="fas fa-file-alt"></i> Datadog Logs
+                        <button class="nav-link" id="figma-tab" data-bs-toggle="tab" data-bs-target="#figma-pane" type="button" role="tab">
+                            <i class="fab fa-figma"></i> Figma
                         </button>
                     </li>
                 </ul>
@@ -1644,6 +1644,11 @@
                 githubSidebar.style.display = 'block';
                 azuredevopsSidebar.style.display = 'none';
                 figmaSidebar.style.display = 'none';
+                
+                // Load GitHub data when tab is first clicked
+                if (githubConfigured && selectedRepos.length > 0) {
+                    updateGitHubDashboard();
+                }
             });
             
             azuredevopsTab.addEventListener('click', function() {
@@ -2105,15 +2110,101 @@
 
             const days = document.getElementById('github-time-range').value;
             const chartType = document.getElementById('github-chart-type').value;
+            const updateBtn = document.getElementById('github-update-btn');
 
-            // Update GitHub analytics summary
-            await updateGitHubSummary(days);
-            
-            // Update GitHub charts
-            await updateGitHubCharts(days, chartType);
-            
-            // Update recent PRs
-            await updateRecentPRs(days);
+            // Disable button and show loading state
+            updateBtn.disabled = true;
+            updateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+
+            // Show loading states for all sections
+            showGitHubLoadingStates();
+
+            try {
+                // Update GitHub analytics summary
+                await updateGitHubSummary(days);
+                
+                // Update GitHub charts
+                await updateGitHubCharts(days, chartType);
+                
+                // Update recent PRs
+                await updateRecentPRs(days);
+            } catch (error) {
+                console.error('Error updating GitHub dashboard:', error);
+                showGitHubErrorStates();
+            } finally {
+                // Re-enable button
+                updateBtn.disabled = false;
+                updateBtn.innerHTML = '<i class="fas fa-sync"></i> Update GitHub Analytics';
+            }
+        }
+
+        function showGitHubLoadingStates() {
+            // Show loading state for summary
+            document.getElementById('github-summary').innerHTML = `
+                <div class="col-12">
+                    <div class="text-center" style="padding: 40px;">
+                        <div style="background: #9c27b0; width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(156, 39, 176, 0.3);">
+                            <i class="fas fa-spinner fa-spin fa-2x" style="color: white;"></i>
+                        </div>
+                        <h5 style="color: #333; margin-bottom: 10px; font-weight: 600;">Loading GitHub Analytics...</h5>
+                        <p style="color: #666;">Fetching pull request data from GitHub</p>
+                    </div>
+                </div>
+            `;
+
+            // Show loading state for charts
+            document.getElementById('github-charts-container').innerHTML = `
+                <div class="col-12">
+                    <div class="text-center" style="padding: 40px;">
+                        <div style="background: #9c27b0; width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(156, 39, 176, 0.3);">
+                            <i class="fas fa-chart-line fa-spin fa-2x" style="color: white;"></i>
+                        </div>
+                        <h5 style="color: #333; margin-bottom: 10px; font-weight: 600;">Loading Charts...</h5>
+                        <p style="color: #666;">Generating analytics charts</p>
+                    </div>
+                </div>
+            `;
+
+            // Show loading state for recent PRs
+            document.getElementById('recent-prs-container').innerHTML = `
+                <div class="text-center" style="padding: 40px;">
+                    <div style="background: #9c27b0; width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(156, 39, 176, 0.3);">
+                        <i class="fas fa-code-branch fa-spin fa-2x" style="color: white;"></i>
+                    </div>
+                    <h5 style="color: #333; margin-bottom: 10px; font-weight: 600;">Loading Recent PRs...</h5>
+                    <p style="color: #666;">Fetching recent pull requests</p>
+                </div>
+            `;
+        }
+
+        function showGitHubErrorStates() {
+            // Show error state for summary
+            document.getElementById('github-summary').innerHTML = `
+                <div class="col-12">
+                    <div class="alert alert-danger" style="background: #ffebee; border: 1px solid #f44336; color: #c62828; border-radius: 4px; padding: 15px;">
+                        <i class="fas fa-exclamation-triangle fa-lg" style="color: #f44336;"></i>
+                        <strong>Error loading GitHub analytics</strong>
+                    </div>
+                </div>
+            `;
+
+            // Show error state for charts
+            document.getElementById('github-charts-container').innerHTML = `
+                <div class="col-12">
+                    <div class="alert alert-danger" style="background: #ffebee; border: 1px solid #f44336; color: #c62828; border-radius: 4px; padding: 15px;">
+                        <i class="fas fa-exclamation-triangle fa-lg" style="color: #f44336;"></i>
+                        <strong>Error loading GitHub charts</strong>
+                    </div>
+                </div>
+            `;
+
+            // Show error state for recent PRs
+            document.getElementById('recent-prs-container').innerHTML = `
+                <div class="alert alert-danger" style="background: #ffebee; border: 1px solid #f44336; color: #c62828; border-radius: 4px; padding: 15px;">
+                    <i class="fas fa-exclamation-triangle fa-lg" style="color: #f44336;"></i>
+                    <strong>Error loading recent pull requests</strong>
+                </div>
+            `;
         }
 
         async function updateGitHubSummary(days) {
