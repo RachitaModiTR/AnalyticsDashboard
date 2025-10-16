@@ -3,12 +3,9 @@
 
 # Your Figma Personal Access Token
 # Get this from: Figma → Account Settings → Personal Access Tokens
-FIGMA_TOKEN = 'your_figma_token_here'
+FIGMA_TOKEN = os.getenv('FIGMA_TOKEN')
+FIGMA_TEAM_ID = os.getenv('FIGMA_TEAM_ID', '')
 
-# Your Figma Team ID
-# This can be found in your Figma team URL: https://www.figma.com/files/team/{team_id}
-# Or by going to your team page and looking at the URL
-FIGMA_TEAM_ID = 'your_team_id_here'
 
 # Example:
 # FIGMA_TOKEN = 'figd_abc123def456ghi789jkl012mno345pqr678stu901vwx234yz'

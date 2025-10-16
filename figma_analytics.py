@@ -28,13 +28,14 @@ class FigmaAnalytics:
             'Content-Type': 'application/json'
         }
     
-    def get_team_projects(self):
+    def get_team_projects(self, team_id: str = None):
         """Fetch projects from Figma team"""
-        if not self.figma_token or not self.team_id:
+        effective_team_id = team_id or self.team_id
+        if not self.figma_token or not effective_team_id:
             return None
             
         try:
-            url = f"{self.base_url}/teams/{self.team_id}/projects"
+            url = f"{self.base_url}/teams/{effective_team_id}/projects"
             headers = self._get_headers()
             
             response = requests.get(url, headers=headers)
@@ -49,13 +50,14 @@ class FigmaAnalytics:
             print(f"Error fetching team projects: {e}")
             return None
     
-    def get_project_files(self, project_id):
+    def get_project_files(self, project_id, team_id: str = None):
         """Fetch files from a specific project"""
-        if not self.figma_token or not self.team_id:
+        if not self.figma_token:
             return None
             
         try:
-            url = f"{self.base_url}/teams/{self.team_id}/projects/{project_id}/files"
+            # Figma API uses /projects/{project_id}/files (team_id not required)
+            url = f"{self.base_url}/projects/{project_id}/files"
             headers = self._get_headers()
             
             response = requests.get(url, headers=headers)
@@ -112,9 +114,10 @@ class FigmaAnalytics:
             print(f"Error fetching file comments: {e}")
             return None
     
-    def get_team_analytics(self, days=30):
+    def get_team_analytics(self, days=30, team_id: str = None):
         """Get comprehensive team analytics"""
-        if not self.figma_token or not self.team_id:
+        effective_team_id = team_id or self.team_id
+        if not self.figma_token or not effective_team_id:
             return {
                 'status': 'error',
                 'message': 'Figma configuration not provided'
@@ -122,7 +125,7 @@ class FigmaAnalytics:
             
         try:
             # Get team projects
-            projects_data = self.get_team_projects()
+            projects_data = self.get_team_projects(effective_team_id)
             if not projects_data:
                 return {
                     'status': 'error',
@@ -145,7 +148,7 @@ class FigmaAnalytics:
                 project_name = project['name']
                 
                 # Get files for this project
-                files_data = self.get_project_files(project_id)
+                files_data = self.get_project_files(project_id, effective_team_id)
                 if files_data:
                     files = files_data.get('files', [])
                     analytics['total_files'] += len(files)
@@ -211,9 +214,9 @@ class FigmaAnalytics:
                 'message': f'Error calculating analytics: {str(e)}'
             }
     
-    def get_chart_data(self, chart_type='files_by_project', days=30):
+    def get_chart_data(self, chart_type='files_by_project', days=30, team_id: str = None):
         """Get chart data for Figma analytics"""
-        result = self.get_team_analytics(days)
+        result = self.get_team_analytics(days, team_id)
         
         if result['status'] != 'success':
             return None
@@ -294,14 +297,15 @@ class FigmaAnalytics:
         
         return json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
     
-    def search_files(self, query):
+    def search_files(self, query, team_id: str = None):
         """Search for files by name or content"""
-        if not self.figma_token or not self.team_id:
+        effective_team_id = team_id or self.team_id
+        if not self.figma_token or not effective_team_id:
             return None
             
         try:
             # Get all projects and search through files
-            projects_data = self.get_team_projects()
+            projects_data = self.get_team_projects(effective_team_id)
             if not projects_data:
                 return []
             
@@ -309,7 +313,7 @@ class FigmaAnalytics:
             
             for project in projects_data.get('projects', []):
                 project_id = project['id']
-                files_data = self.get_project_files(project_id)
+                files_data = self.get_project_files(project_id, effective_team_id)
                 
                 if files_data:
                     for file in files_data.get('files', []):

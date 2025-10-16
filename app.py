@@ -864,14 +864,16 @@ def get_azuredevops_repositories():
 def get_figma_analytics():
     """API endpoint to get Figma team analytics"""
     days = request.args.get('days', 30, type=int)
+    team_id = request.args.get('team_id', None)
     
-    result = figma_analytics.get_team_analytics(days)
+    result = figma_analytics.get_team_analytics(days, team_id)
     return jsonify(result)
 
 @app.route('/api/figma/projects')
 def get_figma_projects():
     """API endpoint to get Figma team projects"""
-    projects = figma_analytics.get_team_projects()
+    team_id = request.args.get('team_id', None)
+    projects = figma_analytics.get_team_projects(team_id)
     
     if projects is not None:
         return jsonify({
@@ -899,6 +901,39 @@ def get_figma_project_files(project_id):
             'status': 'error',
             'message': 'Failed to fetch project files'
         }), 500
+
+@app.route('/api/figma/projects/<project_id>/analytics')
+def get_figma_project_analytics(project_id):
+    """Get files and basic collaborators/comments summary for a project"""
+    try:
+        files_data = figma_analytics.get_project_files(project_id)
+        files = files_data.get('files', []) if files_data else []
+
+        # For lightweight summary, sample up to first 5 files for comments
+        total_comments = 0
+        collaborators = set()
+        for f in files[:5]:
+            key = f.get('key')
+            if not key:
+                continue
+            comments_data = figma_analytics.get_file_comments(key)
+            if comments_data:
+                comments = comments_data.get('comments', [])
+                total_comments += len(comments)
+                for c in comments:
+                    if 'user' in c:
+                        collaborators.add(c['user'].get('handle', 'Unknown'))
+
+        return jsonify({
+            'status': 'success',
+            'data': {
+                'files': files,
+                'total_comments': total_comments,
+                'collaborators': list(collaborators)
+            }
+        })
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
 
 @app.route('/api/figma/files/<file_key>')
 def get_figma_file_info(file_key):
@@ -936,6 +971,7 @@ def get_figma_file_comments(file_key):
 def search_figma_files():
     """API endpoint to search for files"""
     query = request.args.get('q', '')
+    team_id = request.args.get('team_id', None)
     
     if not query:
         return jsonify({
@@ -943,7 +979,7 @@ def search_figma_files():
             'message': 'Search query is required'
         }), 400
     
-    results = figma_analytics.search_files(query)
+    results = figma_analytics.search_files(query, team_id)
     
     if results is not None:
         return jsonify({
@@ -961,8 +997,9 @@ def get_figma_chart():
     """API endpoint to get Figma chart data"""
     days = request.args.get('days', 30, type=int)
     chart_type = request.args.get('type', 'files_by_project')
+    team_id = request.args.get('team_id', None)
     
-    chart_data = figma_analytics.get_chart_data(chart_type, days)
+    chart_data = figma_analytics.get_chart_data(chart_type, days, team_id)
     
     if chart_data:
         return jsonify({

@@ -935,6 +935,14 @@
                         </div>
                     </div>
 
+                    
+                    <div class="metric-selector">
+                        <h6>Team Projects</h6>
+                        <div id="figma-projects-sidebar" style="max-height: 260px; overflow-y: auto;">
+                            <div class="text-muted small">Projects will appear here after configuring a Team ID.</div>
+                        </div>
+                    </div>
+
                     <div class="metric-selector">
                         <h6>Time Range</h6>
                         <select class="form-select" id="figma-time-range">
@@ -1222,6 +1230,16 @@
 
                         <div id="figma-charts-container">
                             <!-- Dynamic charts will be loaded here -->
+                        </div>
+
+                         <!-- Team Projects -->
+                         <div class="row mt-4">
+                            <div class="col-12">
+                                <h4><i class="fas fa-folder-open"></i> Team Projects</h4>
+                                <div id="figma-projects-container">
+                                    <!-- Dynamic content will be loaded here -->
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Recent Files and Projects -->
@@ -1658,6 +1676,9 @@
                 githubSidebar.style.display = 'none';
                 azuredevopsSidebar.style.display = 'none';
                 figmaSidebar.style.display = 'block';
+                if (figmaConfigured) {
+                    updateFigmaSidebarProjects();
+                }
             });
             
             // Show Azure DevOps sidebar by default since it's the active tab
@@ -3220,6 +3241,9 @@
             
             // Update Figma dashboard
             updateFigmaDashboard();
+
+            // Update Figma projects sidebar
+            updateFigmaSidebarProjects();
         }
 
         async function updateFigmaDashboard() {
@@ -3236,14 +3260,25 @@
             
             // Update Figma charts
             await updateFigmaCharts(days, chartType);
+
+            // Update Figma projects sidebar
+            updateFigmaProjects();
             
             // Update recent items
             await updateRecentFigmaItems(days);
+        }  
+
+        async function updateFigmaProjects() {
+            if (!figmaConfigured) {
+                document.getElementById('figma-projects-container').innerHTML = '<div class="alert alert-info">Please configure Figma team first.</div>';
+                return;
+            }
+            
         }
 
         async function updateFigmaSummary(days) {
             try {
-                const response = await fetch(`/api/figma/analytics?days=${days}`);
+                const response = await fetch(`/api/figma/analytics?days=${days}&team_id=${encodeURIComponent(figmaTeamId)}`);
                 const result = await response.json();
 
                 if (result.status === 'success') {
@@ -3315,7 +3350,7 @@
             container.innerHTML = '';
 
             try {
-                const response = await fetch(`/api/figma/chart?days=${days}&type=${chartType}`);
+                const response = await fetch(`/api/figma/chart?days=${days}&type=${chartType}&team_id=${encodeURIComponent(figmaTeamId)}`);
                 const result = await response.json();
 
                 if (result.status === 'success') {
@@ -3343,7 +3378,7 @@
 
         async function updateRecentFigmaItems(days) {
             try {
-                const response = await fetch(`/api/figma/analytics?days=${days}`);
+                const response = await fetch(`/api/figma/analytics?days=${days}&team_id=${encodeURIComponent(figmaTeamId)}`);
                 const result = await response.json();
 
                 if (result.status === 'success' && result.data) {
@@ -3423,7 +3458,7 @@
             }
 
             try {
-                const response = await fetch(`/api/figma/search?q=${encodeURIComponent(query)}`);
+                const response = await fetch(`/api/figma/search?q=${encodeURIComponent(query)}&team_id=${encodeURIComponent(figmaTeamId)}`);
                 const result = await response.json();
 
                 if (result.status === 'success') {
@@ -4953,6 +4988,131 @@
                 .catch(error => {
                     console.error('Error checking AI status:', error);
                 });
+        }
+
+        async function updateFigmaProjects() {
+            const container = document.getElementById('figma-projects-container');
+            container.innerHTML = '<div class="alert alert-secondary">Loading projects...</div>';
+
+            try {
+                const response = await fetch(`/api/figma/projects?team_id=${encodeURIComponent(figmaTeamId)}`);
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    displayFigmaProjects(result.data);
+                } else {
+                    container.innerHTML = `<div class="alert alert-warning">${result.message || 'No projects available.'}</div>`;
+                }
+            } catch (error) {
+                console.error('Error loading Figma projects:', error);
+                container.innerHTML = '<div class="alert alert-danger">Error loading projects</div>';
+            }
+        }
+
+        function displayFigmaProjects(data) {
+            const container = document.getElementById('figma-projects-container');
+            container.innerHTML = '';
+
+            const projects = (data && data.projects) ? data.projects : [];
+
+            if (projects.length === 0) {
+                container.innerHTML = '<div class="alert alert-info">No projects found for this team.</div>';
+                return;
+            }
+
+            projects.slice(0, 12).forEach(project => {
+                const card = document.createElement('div');
+                card.className = 'card mb-2';
+                card.innerHTML = `
+                    <div class="card-body p-2">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6 class="mb-1">${project.name || 'Untitled Project'}</h6>
+                                <small class="text-muted">ID: ${project.id}</small>
+                            </div>
+                        </div>
+                        ${project.description ? `<div class="mt-1"><small class="text-muted">${project.description}</small></div>` : ''}
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        async function updateFigmaSidebarProjects() {
+            const container = document.getElementById('figma-projects-sidebar');
+            if (!figmaConfigured || !figmaTeamId) {
+                container.innerHTML = '<div class="text-muted small">Enter a Team ID to load projects.</div>';
+                return;
+            }
+
+            container.innerHTML = '<div class="small text-muted">Loading projects...</div>';
+            try {
+                const response = await fetch(`/api/figma/projects?team_id=${encodeURIComponent(figmaTeamId)}`);
+                const result = await response.json();
+                if (result.status === 'success') {
+                    renderFigmaSidebarProjects(result.data);
+                } else {
+                    container.innerHTML = `<div class=\"small text-warning\">${result.message || 'No projects available.'}</div>`;
+                }
+            } catch (e) {
+                console.error('Error loading Figma projects (sidebar):', e);
+                container.innerHTML = '<div class="small text-danger">Error loading projects</div>';
+            }
+        }
+
+        function renderFigmaSidebarProjects(data) {
+            const container = document.getElementById('figma-projects-sidebar');
+            container.innerHTML = '';
+            const projects = (data && data.projects) ? data.projects : [];
+            if (projects.length === 0) {
+                container.innerHTML = '<div class="small text-muted">No projects found for this team.</div>';
+                return;
+            }
+
+            projects.forEach(project => {
+                const item = document.createElement('div');
+                item.className = 'd-flex justify-content-between align-items-center py-1 border-bottom';
+                item.innerHTML = `
+                    <div>
+                        <div class=\"fw-semibold small\">${project.name || 'Untitled Project'}</div>
+                        <div class=\"text-muted tiny\">${project.id}</div>
+                    </div>
+                `;
+                item.style.cursor = 'pointer';
+                item.onclick = () => loadProjectAnalytics(project.id);
+                container.appendChild(item);
+            });
+        }
+
+        async function loadProjectAnalytics(projectId) {
+            // Load files/comments/collaborators for selected project
+            try {
+                // Highlight selection
+                Array.from(document.querySelectorAll('#figma-projects-sidebar > div')).forEach(div => div.classList.remove('bg-light'));
+                const target = Array.from(document.querySelectorAll('#figma-projects-sidebar > div')).find(div => div.textContent.includes(projectId));
+                if (target) target.classList.add('bg-light');
+
+                const resp = await fetch(`/api/figma/projects/${encodeURIComponent(projectId)}/analytics`);
+                const result = await resp.json();
+                if (result.status !== 'success') {
+                    console.error('Failed to load project analytics:', result.message);
+                    return;
+                }
+
+                const data = result.data || {};
+                // Populate recent files section
+                displayRecentFigmaFiles((data.files || []).map(f => ({
+                    key: f.key,
+                    name: f.name,
+                    comments_count: 0,
+                    version: f.version || '1'
+                })));
+
+                // Populate collaborators
+                displayFigmaCollaborators(data.collaborators || []);
+            } catch (e) {
+                console.error('Error loading project analytics:', e);
+            }
         }
     </script>
                 </div> <!-- End analyticsContent -->
