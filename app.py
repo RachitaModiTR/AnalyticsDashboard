@@ -823,25 +823,29 @@ def get_azuredevops_repositories():
         azuredevops_analytics.area_path = area_path
     
     try:
-        # Get streamlined analytics to extract repositories
+        # Use the existing streamlined analytics to get repositories (same as Azure DevOps tab)
+        # This ensures consistency with what's shown in the Azure DevOps dashboard
         result = azuredevops_analytics.get_streamlined_analytics(days)
         
         if result.get('status') == 'success':
             data = result.get('data', {})
-            involved_repositories = data.get('involved_repositories', [])
-            repository_breakdown = data.get('repository_breakdown', {})
+            resolved_repos = data.get('resolved_repositories', [])
             
-            # Resolve actual repository names from Azure DevOps
-            print(f"🔍 Resolving {len(involved_repositories)} repository names...")
-            resolved_repos = azuredevops_analytics._get_resolved_repositories(involved_repositories, repository_breakdown)
+            # If no resolved repositories, fall back to involved repositories
+            if not resolved_repos:
+                involved_repos = data.get('involved_repositories', [])
+                repository_breakdown = data.get('repository_breakdown', {})
+                resolved_repos = azuredevops_analytics._get_resolved_repositories(involved_repos, repository_breakdown)
             
             return jsonify({
                 'status': 'success',
                 'repositories': resolved_repos,
                 'total_repositories': len(resolved_repos),
                 'analysis_period': f'{days} days',
+                'total_work_items': data.get('total_work_items', 0),
+                'total_prs': data.get('total_pull_requests', 0),
                 'resolved_count': len([r for r in resolved_repos if r.get('resolved', False)]),
-                'note': 'Repository names resolved from Azure DevOps repository details'
+                'note': f'Repositories from Azure DevOps analytics (same as dashboard)'
             })
         else:
             return jsonify({

@@ -832,6 +832,7 @@ class AzureDevOpsAnalytics:
             analytics = {
                 'total_work_items': len(work_items) if work_items else 0,
                 'total_pull_requests': len(pull_requests) if pull_requests else 0,
+                'total_commits': 0,  # Will be calculated from PR data
                 'total_repositories': 0,  # Will be calculated from PR data
                 'work_items_by_type': {},
                 'work_items_by_state': {},
@@ -920,14 +921,22 @@ class AzureDevOpsAnalytics:
                 else:
                     print(f"📋 PR analysis skipped for performance - {len(work_items)} work items processed")
                 
-                # Get recent work items (limit to 10 for display)
-                analytics['recent_work_items'] = work_items[:10]
+                # Get recent work items sorted by creation date (most recent first, limit to 10)
+                sorted_work_items = sorted(work_items, 
+                                         key=lambda x: x.get('fields', {}).get('System.CreatedDate', ''), 
+                                         reverse=True)
+                analytics['recent_work_items'] = sorted_work_items[:10]
             
             # Analyze pull requests
+            commit_count = 0
             if pull_requests:
                 for pr in pull_requests:
                     status = pr.get('status', 'Unknown')
                     analytics['prs_by_status'][status] = analytics['prs_by_status'].get(status, 0) + 1
+                    
+                    # Count commits vs PRs
+                    if pr.get('is_commit', False):
+                        commit_count += 1
                     
                     # Extract repository information from pull requests
                     repo_identifier = pr.get('full_repo_path', '')
@@ -935,7 +944,13 @@ class AzureDevOpsAnalytics:
                         # Handle repository object structure
                         repo_obj = pr.get('repository', {})
                         if isinstance(repo_obj, dict):
-                            repo_identifier = repo_obj.get('name', '') or repo_obj.get('url', '')
+                            repo_name = repo_obj.get('name', '')
+                            if repo_name and repo_name.startswith('GitHub-'):
+                                # Convert GitHub-206cdeed to GitHub/206cdeed format expected by resolver
+                                repo_id = repo_name.replace('GitHub-', '')
+                                repo_identifier = f'GitHub/{repo_id}'
+                            else:
+                                repo_identifier = repo_name or repo_obj.get('url', '')
                         else:
                             repo_identifier = str(repo_obj) if repo_obj else ''
                     
@@ -944,6 +959,32 @@ class AzureDevOpsAnalytics:
                 
                 # Get recent PRs (limit to 10 for display)
                 analytics['recent_pull_requests'] = pull_requests[:10]
+            
+            # Create repository breakdown for resolution
+            repository_breakdown = {}
+            for pr in pull_requests or []:
+                repo_obj = pr.get('repository', {})
+                if isinstance(repo_obj, dict):
+                    repo_name = repo_obj.get('name', 'Unknown')
+                    # Use the original GitHub-xxx format for breakdown counting
+                    repository_breakdown[repo_name] = repository_breakdown.get(repo_name, 0) + 1
+            
+            # Resolve repository names to actual GitHub repo names
+            resolved_repos = self._get_resolved_repositories(sorted(list(all_repositories)), repository_breakdown)
+            
+            # Update final counts in analytics
+            analytics['total_commits'] = commit_count
+            analytics['total_repositories'] = len(resolved_repos)
+            analytics['involved_repositories'] = [repo['github_repo'] for repo in resolved_repos if repo.get('github_repo')]
+            analytics['resolved_repositories'] = resolved_repos  # Include full resolution data
+            
+            print(f"📊 Final Analytics Summary:")
+            print(f"   - Work Items: {analytics['total_work_items']}")
+            print(f"   - Pull Requests: {analytics['total_pull_requests']}")
+            print(f"   - Commits: {analytics['total_commits']}")
+            print(f"   - Repositories (raw): {len(all_repositories)}")
+            print(f"   - Repositories (resolved): {analytics['total_repositories']}")
+            print(f"   - Repository Names: {analytics['involved_repositories']}")
             
             return {
                 'status': 'success',
@@ -1208,9 +1249,16 @@ class AzureDevOpsAnalytics:
                 }
             }
             
+            # Check for exact match first
             if repository_id in known_repos:
                 print(f"🎯 Found in known repositories mapping: {known_repos[repository_id]['github_repo']}")
                 return known_repos[repository_id]
+            
+            # Check for partial match (shortened ID)
+            for full_id, repo_info in known_repos.items():
+                if full_id.startswith(repository_id):
+                    print(f"🎯 Found partial match for {repository_id} -> {full_id}: {repo_info['github_repo']}")
+                    return repo_info
             
             # If not in known repos, try to make an educated guess based on patterns
             # This could be enhanced with more sophisticated logic
@@ -1231,6 +1279,82 @@ class AzureDevOpsAnalytics:
             print(f"❌ GitHub resolution failed for {repository_id}: {e}")
             return None
     
+    def get_repositories_fast(self, days=30):
+        """
+        Fast repository extraction without full analytics - optimized for GitHub sync
+        """
+        print(f"🚀 FAST REPO EXTRACTION: Getting repositories for {days} days...")
+        
+        try:
+            # Get work items quickly (without PR relations)
+            work_items = self._get_work_items_fast(days)
+            if not work_items:
+                return {
+                    'status': 'error',
+                    'message': 'No work items found'
+                }
+            
+            print(f"📋 Found {len(work_items)} work items, extracting repository info...")
+            
+            # Get PR data for a small sample to extract repositories quickly
+            # We only need to analyze a few recent work items to get the repository list
+            sample_size = min(20, len(work_items))  # Analyze only 20 most recent work items
+            sample_work_items = sorted(work_items, 
+                                     key=lambda x: x.get('fields', {}).get('System.CreatedDate', ''), 
+                                     reverse=True)[:sample_size]
+            
+            print(f"🔍 Analyzing {sample_size} recent work items for repository extraction...")
+            
+            # Get PR relations for sample work items
+            work_item_ids = [item['id'] for item in sample_work_items]
+            base_url = self._get_base_url()
+            detailed_work_items = self._get_work_item_details(work_item_ids, base_url)
+            
+            # Extract repositories from PR relations
+            repositories = set()
+            repository_breakdown = {}
+            
+            if detailed_work_items:
+                for item in detailed_work_items:
+                    associated_prs = item.get('associated_prs', [])
+                    for pr in associated_prs:
+                        # Extract repository from PR relation
+                        repo_url = pr.get('url', '')
+                        if 'GitHub' in repo_url:
+                            # Extract repository ID from GitHub URL
+                            if 'GitHub/Commit/' in repo_url or 'GitHub/PullRequest/' in repo_url:
+                                # Extract repo ID from vstfs URL
+                                parts = repo_url.split('/')
+                                for i, part in enumerate(parts):
+                                    if part in ['Commit', 'PullRequest'] and i > 0:
+                                        repo_id = parts[i-1]
+                                        repo_path = f'GitHub/{repo_id}'
+                                        repositories.add(repo_path)
+                                        repository_breakdown[f'GitHub-{repo_id[:8]}'] = repository_breakdown.get(f'GitHub-{repo_id[:8]}', 0) + 1
+                                        break
+            
+            print(f"📊 Found {len(repositories)} unique repositories from sample analysis")
+            
+            # Resolve repository names
+            resolved_repos = self._get_resolved_repositories(sorted(list(repositories)), repository_breakdown)
+            
+            return {
+                'status': 'success',
+                'data': {
+                    'repositories': resolved_repos,
+                    'total_repositories': len(resolved_repos),
+                    'sample_size': sample_size,
+                    'total_work_items': len(work_items)
+                }
+            }
+            
+        except Exception as e:
+            print(f"❌ Error in fast repository extraction: {str(e)}")
+            return {
+                'status': 'error',
+                'message': f'Error extracting repositories: {str(e)}'
+            }
+
     def _get_resolved_repositories(self, involved_repositories, repository_breakdown):
         """
         Get resolved repository names for all involved repositories
@@ -1316,9 +1440,9 @@ class AzureDevOpsAnalytics:
             work_items_by_assignee = {}
             recent_work_items = []
             
-            # Sort work items by changed date for recent items
+            # Sort work items by creation date for recent items (most recent first)
             sorted_work_items = sorted(work_items, 
-                                     key=lambda x: x.get('fields', {}).get('System.ChangedDate', ''), 
+                                     key=lambda x: x.get('fields', {}).get('System.CreatedDate', ''), 
                                      reverse=True)
             
             for item in work_items:
