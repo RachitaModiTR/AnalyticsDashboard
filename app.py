@@ -8,6 +8,7 @@ from azuredevops_analytics import AzureDevOpsAnalytics
 from figma_analytics import FigmaAnalytics
 from chatbot_analytics import ChatbotAnalytics
 from datadog_analytics import DatadogApplicationKeyAnalytics
+from context_storage import context_storage
 
 # Load environment variables
 load_dotenv()
@@ -30,9 +31,154 @@ def index():
                          application_key=Config.DD_APPLICATION_KEY,
                          site=Config.DD_SITE)
 
+@app.route('/api/metrics')
+def get_metrics():
+    """API endpoint to get available metrics"""
+    metrics = datadog_analytics.get_available_metrics()
+    return jsonify(metrics)
 
+@app.route('/api/metrics/<metric_name>')
+def get_metric_data(metric_name):
+    """API endpoint to get specific metric data"""
+    hours = request.args.get('hours', 24, type=int)
+    tags = request.args.get('tags', '')
+    
+    from_time = int((datetime.now() - timedelta(hours=hours)).timestamp())
+    to_time = int(datetime.now().timestamp())
+    
+    tag_list = [tag.strip() for tag in tags.split(',') if tag.strip()] if tags else None
+    
+    data = datadog_analytics.get_metrics_data(metric_name, from_time, to_time, tag_list)
+    
+    if data:
+        return jsonify({
+            'status': 'success',
+            'data': data
+        })
+    else:
+        return jsonify({
+            'status': 'error',
+            'message': 'Failed to fetch metric data'
+        }), 500
 
+@app.route('/api/analytics')
+def get_analytics():
+    """API endpoint to get analytics dashboard data"""
+    metric_names = request.args.getlist('metrics')
+    hours = request.args.get('hours', 24, type=int)
+    
+    if not metric_names:
+        return jsonify({
+            'status': 'error',
+            'message': 'No metrics specified'
+        }), 400
+    
+    from_time = int((datetime.now() - timedelta(hours=hours)).timestamp())
+    to_time = int(datetime.now().timestamp())
+    
+    all_metrics_data = []
+    for metric_name in metric_names:
+        data = datadog_analytics.get_metrics_data(metric_name, from_time, to_time)
+        if data and 'series' in data:
+            all_metrics_data.extend(data['series'])
+    
+    # Create a combined metrics data structure
+    combined_data = {
+        'series': all_metrics_data,
+        'from': from_time,
+        'to': to_time
+    }
+    
+    analytics_data = datadog_analytics.create_analytics_dashboard(combined_data)
+    
+    # If no real data available, generate sample data for demonstration
+    if not analytics_data or not analytics_data.get('metrics_summary'):
+        analytics_data = datadog_analytics._generate_sample_data(metric_names, hours)
+    
+    if analytics_data:
+        # Store context for chatbot
+        context_storage.update_datadog_context(analytics_data)
+        
+        return jsonify({
+            'status': 'success',
+            'data': analytics_data
+        })
+    else:
+        return jsonify({
+            'status': 'error',
+            'message': 'Failed to create analytics data'
+        }), 500
 
+@app.route('/api/charts/<metric_name>')
+def get_chart_data(metric_name):
+    """API endpoint to get chart data for a specific metric"""
+    hours = request.args.get('hours', 24, type=int)
+    chart_type = request.args.get('type', 'line')
+    
+    chart_data = datadog_analytics.get_chart_data(metric_name, hours, chart_type)
+    
+    # If no real data available, generate sample chart data for demonstration
+    if not chart_data:
+        chart_data = datadog_analytics._generate_sample_chart_data(metric_name, hours, chart_type)
+    
+    if chart_data:
+        return jsonify({
+            'status': 'success',
+            'chart': chart_data
+        })
+    else:
+        return jsonify({
+            'status': 'error',
+            'message': 'No data available for chart'
+        }), 404
+
+@app.route('/api/datadog/dashboards')
+def get_all_dashboards():
+    """API endpoint to get all Datadog dashboards"""
+    data = datadog_analytics.get_all_dashboards()
+    
+    if data:
+        return jsonify({
+            'status': 'success',
+            'data': data
+        })
+    else:
+        return jsonify({
+            'status': 'error',
+            'message': 'Failed to fetch dashboards'
+        }), 500
+
+@app.route('/api/datadog/dashboards/<dashboard_id>')
+def get_dashboard_by_id(dashboard_id):
+    """API endpoint to get specific dashboard data by ID"""
+    data = datadog_analytics.get_dashboard_by_id(dashboard_id)
+    
+    if data:
+        return jsonify({
+            'status': 'success',
+            'data': data
+        })
+    else:
+        return jsonify({
+            'status': 'error',
+            'message': 'Failed to fetch dashboard data'
+        }), 500
+
+@app.route('/api/dashboard/<dashboard_id>')
+def get_dashboard(dashboard_id):
+    """API endpoint to get dashboard data (legacy endpoint)"""
+    data = datadog_analytics.get_dashboard_data(dashboard_id)
+    
+    if data:
+        return jsonify({
+            'status': 'success',
+            'data': data
+        })
+    else:
+        return jsonify({
+            'status': 'error',
+            'message': 'Failed to fetch dashboard data'
+        }), 500
 
 # GitHub Pull Request API Routes
 @app.route('/api/github/prs')
@@ -54,6 +200,11 @@ def get_github_pull_requests():
     
     # Get analytics for multiple repositories
     combined_analytics = get_multi_repo_analytics(repos, days)
+    
+    # Store context for chatbot
+    if combined_analytics and combined_analytics.get('status') == 'success':
+        context_storage.update_github_context(combined_analytics)
+    
     return jsonify(combined_analytics)
 
 @app.route('/api/github/prs/<int:pr_number>')
@@ -615,6 +766,11 @@ def get_azuredevops_analytics():
     
     # Use streamlined analytics for better performance (7-day default)
     result = azuredevops_analytics.get_streamlined_analytics(days)
+    
+    # Store context for chatbot
+    if result and result.get('status') == 'success':
+        context_storage.update_azuredevops_context(result)
+    
     return jsonify(result)
 
 @app.route('/api/azuredevops/analytics-detailed')
@@ -869,6 +1025,11 @@ def get_figma_analytics():
     days = request.args.get('days', 30, type=int)
     
     result = figma_analytics.get_team_analytics(days)
+    
+    # Store context for chatbot
+    if result and result.get('status') == 'success':
+        context_storage.update_figma_context(result)
+    
     return jsonify(result)
 
 @app.route('/api/figma/projects')
@@ -998,6 +1159,9 @@ def get_datadog_logs():
         )
         
         if logs is not None:
+            # Store context for chatbot
+            context_storage.update_datadog_logs_context(logs)
+            
             return jsonify({
                 'status': 'success',
                 'data': logs
@@ -1384,6 +1548,26 @@ def chatbot_suggest_questions(data_source):
             'status': 'error',
             'message': f'Question suggestion error: {str(e)}'
         }), 500
+
+@app.route('/api/chatbot/context/status')
+def chatbot_context_status():
+    """API endpoint to get context storage status"""
+    try:
+        status = context_storage.get_context_summary()
+        return jsonify({'status': 'success', 'data': status})
+    except Exception as e:
+        app.logger.error(f"Context status error: {e}")
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+@app.route('/api/chatbot/context/clear', methods=['POST'])
+def chatbot_clear_context():
+    """API endpoint to clear all stored context"""
+    try:
+        context_storage.clear_context()
+        return jsonify({'status': 'success', 'message': 'Context cleared successfully'})
+    except Exception as e:
+        app.logger.error(f"Clear context error: {e}")
+        return jsonify({'status': 'error', 'message': str(e)}), 500
 
 @app.route('/api/chatbot/status')
 def chatbot_status():

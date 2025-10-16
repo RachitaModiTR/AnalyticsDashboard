@@ -1,0 +1,41 @@
+{
+  "last_updated": null,
+  "data_sources": {
+    "datadog": {
+      "metrics": {},
+      "charts": {},
+      "logs": {},
+      "last_fetch": null,
+      "status": "not_fetched"
+    },
+    "github": {
+      "pull_requests": [],
+      "repositories": [],
+      "analytics": {},
+      "last_fetch": null,
+      "status": "not_fetched"
+    },
+    "azuredevops": {
+      "work_items": [],
+      "pull_requests": [],
+      "analytics": {},
+      "last_fetch": null,
+      "status": "not_fetched"
+    },
+    "figma": {
+      "files": [],
+      "projects": [],
+      "analytics": {},
+      "last_fetch": null,
+      "status": "not_fetched"
+    }
+  },
+  "summary": {
+    "total_work_items": 0,
+    "total_pull_requests": 0,
+    "total_repositories": 0,
+    "total_metrics": 0,
+    "last_activity": null
+  }
+}
+

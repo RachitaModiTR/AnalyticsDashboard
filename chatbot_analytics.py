@@ -9,6 +9,7 @@ from typing import Dict, List, Any, Optional
 import os
 import urllib3
 from config import Config
+from context_storage import context_storage
 
 # Disable SSL warnings for corporate environments
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -26,19 +27,19 @@ class ChatbotAnalytics:
         # Default to OpenAI if no specific provider is configured
         self.llm_provider = os.getenv('LLM_PROVIDER', 'openai').lower()
         
-    def _get_llm_response(self, prompt: str, context_data: Dict = None) -> str:
+    def _get_llm_response(self, prompt: str, context_data: Dict = None, data_source: str = "general") -> str:
         """Get response from configured LLM provider"""
         
         if self.llm_provider == 'openai':
-            return self._call_openai(prompt, context_data)
+            return self._call_openai(prompt, context_data, data_source)
         elif self.llm_provider == 'anthropic' and self.anthropic_api_key:
-            return self._call_anthropic(prompt, context_data)
+            return self._call_anthropic(prompt, context_data, data_source)
         elif self.llm_provider == 'azure' and self.azure_openai_endpoint:
-            return self._call_azure_openai(prompt, context_data)
+            return self._call_azure_openai(prompt, context_data, data_source)
         else:
-            return self._get_fallback_response(prompt, context_data)
+            return self._get_fallback_response(prompt, context_data, data_source)
     
-    def _call_openai(self, prompt: str, context_data: Dict = None) -> str:
+    def _call_openai(self, prompt: str, context_data: Dict = None, data_source: str = "general") -> str:
         """Call Thomson Reuters Azure OpenAI API"""
         try:
             # Thomson Reuters API configuration
@@ -87,11 +88,11 @@ class ChatbotAnalytics:
             messages = [
                 {
                     "role": "system",
-                    "content": "You are a concise analytics assistant. Provide brief, actionable insights in 2-3 sentences maximum. Focus on key findings and immediate recommendations. Use HTML formatting: <strong>bold</strong>, <ul><li>bullet points</li></ul>, <br/> for line breaks. Be direct and practical."
+                    "content": "You are a concise analytics assistant. Provide brief, actionable insights in 2-3 sentences maximum. Focus on key findings and immediate recommendations. Use HTML formatting: <strong>bold</strong>, <ul><li>bullet points</li></ul>, <br/> for line breaks. Be direct and practical. Base your analysis on the provided context data from the analytics dashboard."
                 },
                 {
                     "role": "user", 
-                    "content": self._format_prompt_with_context(prompt, context_data)
+                    "content": self._format_prompt_with_context(prompt, context_data, data_source)
                 }
             ]
             
@@ -119,7 +120,7 @@ class ChatbotAnalytics:
         except Exception as e:
             return f"Error calling OpenAI: {str(e)}"
     
-    def _call_anthropic(self, prompt: str, context_data: Dict = None) -> str:
+    def _call_anthropic(self, prompt: str, context_data: Dict = None, data_source: str = "general") -> str:
         """Call Anthropic Claude API"""
         try:
             headers = {
@@ -157,7 +158,7 @@ class ChatbotAnalytics:
         except Exception as e:
             return f"Error calling Anthropic: {str(e)}"
     
-    def _call_azure_openai(self, prompt: str, context_data: Dict = None) -> str:
+    def _call_azure_openai(self, prompt: str, context_data: Dict = None, data_source: str = "general") -> str:
         """Call Azure OpenAI API"""
         try:
             headers = {
@@ -201,7 +202,7 @@ class ChatbotAnalytics:
         except Exception as e:
             return f"Error calling Azure OpenAI: {str(e)}"
     
-    def _get_fallback_response(self, prompt: str, context_data: Dict = None) -> str:
+    def _get_fallback_response(self, prompt: str, context_data: Dict = None, data_source: str = "general") -> str:
         """Fallback response when no LLM is configured"""
         return f"""🤖 **Analytics Bot Response**
 
@@ -221,19 +222,25 @@ I can see you're asking about: "{prompt}"
 
 Once configured, I'll be able to provide intelligent insights and analysis of your data!"""
     
-    def _format_prompt_with_context(self, prompt: str, context_data: Dict = None) -> str:
-        """Format the prompt with context data"""
-        if not context_data:
-            return prompt
-            
-        context_str = "\n\n**Context Data:**\n"
-        for key, value in context_data.items():
-            if isinstance(value, (dict, list)):
-                context_str += f"- {key}: {json.dumps(value, indent=2)}\n"
-            else:
-                context_str += f"- {key}: {value}\n"
+    def _format_prompt_with_context(self, prompt: str, context_data: Dict = None, data_source: str = "general") -> str:
+        """Format the prompt with context data from storage and provided context"""
+        # Get stored context from all APIs
+        stored_context = context_storage.get_context_for_llm(data_source)
         
-        return f"{prompt}\n{context_str}"
+        # Add provided context data if available
+        additional_context = ""
+        if context_data:
+            additional_context = "\n\n**Additional Context Data:**\n"
+            for key, value in context_data.items():
+                if isinstance(value, (dict, list)):
+                    additional_context += f"- {key}: {json.dumps(value, indent=2)}\n"
+                else:
+                    additional_context += f"- {key}: {value}\n"
+        
+        # Combine all context
+        full_context = f"{stored_context}{additional_context}"
+        
+        return f"{full_context}\n\n**Question:** {prompt}"
     
     def analyze_datadog_metrics(self, metrics_data: Dict, user_question: str) -> str:
         """Analyze Datadog metrics data"""
@@ -247,7 +254,7 @@ Focus on:
 
 Provide actionable insights in a clear, professional format."""
         
-        return self._get_llm_response(prompt, metrics_data)
+        return self._get_llm_response(prompt, metrics_data, "datadog")
     
     def analyze_github_analytics(self, github_data: Dict, user_question: str) -> str:
         """Analyze GitHub pull request analytics"""
@@ -262,7 +269,7 @@ Focus on:
 
 Provide insights about development workflow and team performance."""
         
-        return self._get_llm_response(prompt, github_data)
+        return self._get_llm_response(prompt, github_data, "github")
     
     def analyze_azure_devops_data(self, azure_data: Dict, user_question: str) -> str:
         """Analyze Azure DevOps work items and PRs"""
@@ -277,7 +284,7 @@ Focus on:
 
 Provide actionable recommendations for project management and development workflow."""
         
-        return self._get_llm_response(prompt, azure_data)
+        return self._get_llm_response(prompt, azure_data, "azuredevops")
     
     def analyze_figma_data(self, figma_data: Dict, user_question: str) -> str:
         """Analyze Figma design analytics"""
@@ -292,7 +299,7 @@ Focus on:
 
 Provide insights about design process and collaboration effectiveness."""
         
-        return self._get_llm_response(prompt, figma_data)
+        return self._get_llm_response(prompt, figma_data, "figma")
     
     def get_general_insights(self, all_data: Dict, user_question: str) -> str:
         """Get general insights across all data sources"""
@@ -306,7 +313,7 @@ Data sources include:
 
 Provide cross-platform insights, identify correlations between different data sources, and give strategic recommendations for improving overall development and design processes."""
         
-        return self._get_llm_response(prompt, all_data)
+        return self._get_llm_response(prompt, all_data, "general")
     
     def get_data_summary(self, data_source: str, data: Dict) -> str:
         """Get a summary of data from a specific source"""

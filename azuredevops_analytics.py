@@ -61,17 +61,25 @@ class AzureDevOpsAnalytics:
                 area_filter = f"[System.AreaPath] = '{self.area_path}'"
                 print(f"📋 OPTIMIZED: Using exact area path match: {self.area_path}")
             else:
-                area_filter = "1=1"  # No area filter
+                area_filter = ""  # No area filter
                 print("📋 OPTIMIZED: No area path filter - all work items from project")
             
             # Enhanced WIQL query with date filtering
-            wiql_query = f"""
-            SELECT [System.Id], [System.Title], [System.WorkItemType], [System.State], [System.CreatedDate]
-            FROM WorkItems 
-            WHERE [System.TeamProject] = '{self.project}' 
-            AND {area_filter}
-            AND [System.CreatedDate] >= '{date_filter}'
-            """
+            if area_filter:
+                wiql_query = f"""
+                SELECT [System.Id], [System.Title], [System.WorkItemType], [System.State], [System.CreatedDate]
+                FROM WorkItems 
+                WHERE [System.TeamProject] = '{self.project}' 
+                AND {area_filter}
+                AND [System.CreatedDate] >= '{date_filter}'
+                """
+            else:
+                wiql_query = f"""
+                SELECT [System.Id], [System.Title], [System.WorkItemType], [System.State], [System.CreatedDate]
+                FROM WorkItems 
+                WHERE [System.TeamProject] = '{self.project}' 
+                AND [System.CreatedDate] >= '{date_filter}'
+                """
             
             # Add optional filters
             if work_item_type:
@@ -174,18 +182,28 @@ class AzureDevOpsAnalytics:
                 area_filter = f"[System.AreaPath] UNDER '{self.area_path}'"
                 print(f"📋 GITHUB PR: Using UNDER area path filter: {self.area_path}")
             else:
-                area_filter = "1=1"
+                area_filter = ""
             
             # Full field selection for PR analysis with date filtering
-            wiql_query = f"""
-            SELECT [System.Id], [System.Title], [System.State], [System.WorkItemType], 
-                   [System.CreatedDate], [System.ChangedDate], [System.AssignedTo], [System.AreaPath]
-            FROM WorkItems 
-            WHERE [System.TeamProject] = '{self.project}' 
-            AND {area_filter}
-            AND [System.CreatedDate] >= '{date_filter}'
-            ORDER BY [System.ChangedDate] DESC
-            """
+            if area_filter:
+                wiql_query = f"""
+                SELECT [System.Id], [System.Title], [System.State], [System.WorkItemType], 
+                       [System.CreatedDate], [System.ChangedDate], [System.AssignedTo], [System.AreaPath]
+                FROM WorkItems 
+                WHERE [System.TeamProject] = '{self.project}' 
+                AND {area_filter}
+                AND [System.CreatedDate] >= '{date_filter}'
+                ORDER BY [System.ChangedDate] DESC
+                """
+            else:
+                wiql_query = f"""
+                SELECT [System.Id], [System.Title], [System.State], [System.WorkItemType], 
+                       [System.CreatedDate], [System.ChangedDate], [System.AssignedTo], [System.AreaPath]
+                FROM WorkItems 
+                WHERE [System.TeamProject] = '{self.project}' 
+                AND [System.CreatedDate] >= '{date_filter}'
+                ORDER BY [System.ChangedDate] DESC
+                """
             
             if work_item_type:
                 wiql_query += f" AND [System.WorkItemType] = '{work_item_type}'"
