@@ -631,19 +631,19 @@
                                 <div class="mb-3">
                                     <label for="setupOrgName" class="form-label">
                                         <i class="fas fa-building"></i> Organization Name
-                                    </label>
+                                </label>
                                     <input type="text" class="form-control" id="setupOrgName" placeholder="e.g., tr-tax" required>
                                     <div class="form-text">Your Azure DevOps organization name</div>
-                                </div>
+                            </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="setupProjectName" class="form-label">
                                         <i class="fas fa-project-diagram"></i> Project Name
-                                    </label>
+                                </label>
                                     <input type="text" class="form-control" id="setupProjectName" placeholder="e.g., TaxProf" required>
                                     <div class="form-text">Your Azure DevOps project name</div>
-                                </div>
+                            </div>
                             </div>
                         </div>
                         
@@ -652,22 +652,22 @@
                                 <div class="mb-3">
                                     <label for="setupAreaPath" class="form-label">
                                         <i class="fas fa-sitemap"></i> Area Path
-                                    </label>
+                                </label>
                                     <input type="text" class="form-control" id="setupAreaPath" placeholder="e.g., TaxProf\\us\\taxAuto\\ADGE\\Prep">
                                     <div class="form-text">Area path to filter work items (optional)</div>
-                                </div>
+                            </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="mb-3">
                                     <label for="setupTimeRange" class="form-label">
                                         <i class="fas fa-calendar-alt"></i> Time Range
-                                    </label>
+                                </label>
                                     <select class="form-select" id="setupTimeRange">
                                         <option value="7">Last 7 days</option>
                                         <option value="30" selected>Last 30 days</option>
                                         <option value="90">Last 90 days</option>
                                     </select>
-                                </div>
+                            </div>
                             </div>
                         </div>
                         
@@ -711,22 +711,22 @@
                                 <div class="mb-3">
                                     <label for="setupOrgName" class="form-label">
                                         <i class="fas fa-building"></i> Organization Name
-                                    </label>
+                                </label>
                                     <input type="text" class="form-control" id="setupOrgName" placeholder="e.g., tr-tax" required>
                                     <div class="form-text">Your Azure DevOps organization name</div>
-                                </div>
+                            </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="setupProjectName" class="form-label">
                                         <i class="fas fa-project-diagram"></i> Project Name
-                                    </label>
+                                </label>
                                     <input type="text" class="form-control" id="setupProjectName" placeholder="e.g., TaxProf" required>
                                     <div class="form-text">Your Azure DevOps project name</div>
-                                </div>
                             </div>
                         </div>
-                        
+                    </div>
+
                         <div class="row">
                             <div class="col-md-8">
                                 <div class="mb-3">
@@ -735,7 +735,7 @@
                                     </label>
                                     <input type="text" class="form-control" id="setupAreaPath" placeholder="e.g., TaxProf\\us\\taxAuto\\ADGE\\Prep">
                                     <div class="form-text">Area path to filter work items (optional)</div>
-                                </div>
+                    </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="mb-3">
@@ -746,11 +746,11 @@
                                         <option value="7">Last 7 days</option>
                                         <option value="30" selected>Last 30 days</option>
                                         <option value="90">Last 90 days</option>
-                                    </select>
-                                </div>
+                        </select>
+                    </div>
                             </div>
-                        </div>
-                        
+                    </div>
+
                         <div class="alert alert-info">
                             <i class="fas fa-info-circle"></i>
                             <strong>Note:</strong> Make sure you have a valid Azure DevOps Personal Access Token (PAT) configured in the system. You can update these settings later from the Azure DevOps tab.
@@ -767,7 +767,7 @@
                 </div>
             </div>
         </div>
-    </div>
+                </div>
 
     <div class="container-fluid">
         <div class="row">
@@ -802,7 +802,7 @@
 
                     <div class="metric-selector">
                         <h6><i class="fas fa-sync-alt"></i> Azure DevOps Integration</h6>
-                        <button class="btn btn-outline-info w-100 mb-2" onclick="syncRepositoriesFromAzureDevOps()">
+                        <button class="btn btn-outline-info w-100 mb-2" id="sync-azure-devops-btn" onclick="syncRepositoriesFromAzureDevOps()">
                             <i class="fab fa-microsoft"></i> <i class="fas fa-arrow-right"></i> <i class="fab fa-github"></i> 
                             Sync from Azure DevOps
                                 </button>
@@ -964,7 +964,7 @@
                     <button class="btn btn-primary w-100" onclick="updateFigmaDashboard()">
                         <i class="fas fa-sync"></i> Update Figma Analytics
                     </button>
-                </div>
+            </div>
 
                 <!-- Datadog Configuration -->
                 <div id="datadog-sidebar" style="display: none;">
@@ -974,12 +974,12 @@
                         <small><strong>Datadog Integration:</strong> Logs, Metrics & Monitoring</small><br>
                         <small><strong>Site:</strong> <span id="datadog-site-info">datadoghq.com</span></small><br>
                         <small><strong>Status:</strong> <span id="datadog-status-info">Ready</span></small>
-                    </div>
+                </div>
 
                     <div class="metric-selector">
                         <h6><i class="fas fa-cog"></i> Log Configuration</h6>
-                        <div class="row">
-                            <div class="col-12">
+                <div class="row">
+                    <div class="col-12">
                                 <label for="datadog-time-range" class="form-label">Time Range</label>
                                 <select class="form-select" id="datadog-time-range">
                                     <option value="1">Last 1 hour</option>
@@ -988,31 +988,31 @@
                                     <option value="72">Last 3 days</option>
                                     <option value="168">Last 7 days</option>
                                 </select>
-                            </div>
-                        </div>
+                    </div>
+                </div>
                     </div>
 
                     <div class="metric-selector">
                         <h6>Service Filter</h6>
                         <select class="form-select" id="datadog-service-filter">
-                            <option value="">All Services</option>
+                                                    <option value="">All Services</option>
                             <option value="ultrataxapiservices">UltraTax API Services</option>
                             <option value="ultrataxclientservices">UltraTax Client Services</option>
                             <option value="taxassistantservices">Tax Assistant Services</option>
-                        </select>
-                    </div>
+                                                </select>
+                                            </div>
 
                     <div class="metric-selector">
                         <h6>Log Level Filter</h6>
                         <select class="form-select" id="datadog-level-filter">
-                            <option value="">All Levels</option>
+                                                    <option value="">All Levels</option>
                             <option value="ERROR">ERROR</option>
                             <option value="WARN">WARN</option>
                             <option value="INFO">INFO</option>
                             <option value="DEBUG">DEBUG</option>
                             <option value="TRACE">TRACE</option>
-                        </select>
-                    </div>
+                                                </select>
+                                            </div>
 
                     <div class="metric-selector">
                         <h6>Log Limit</h6>
@@ -1022,13 +1022,13 @@
                             <option value="500">500 logs</option>
                             <option value="1000">1000 logs</option>
                         </select>
-                    </div>
+                                            </div>
 
                     <button class="btn btn-primary w-100" onclick="searchDatadogLogs()">
-                        <i class="fas fa-search"></i> Search Logs
-                    </button>
-                </div>
-            </div>
+                                                    <i class="fas fa-search"></i> Search Logs
+                                                </button>
+                            </div>
+                        </div>
 
             <!-- Main Content -->
             <div class="col-md-9 main-content">
@@ -1055,9 +1055,9 @@
                                                     <p class="text-muted">Set up your Azure DevOps organization, project, and area path</p>
                                                     <button class="btn btn-primary btn-sm" onclick="showWelcomeModal()">
                                                         <i class="fas fa-cog"></i> Start Setup
-                                                    </button>
-                                                </div>
+                                                </button>
                                             </div>
+                                                </div>
                                             
                                             <div class="setup-step">
                                                 <div class="step-number">2</div>
@@ -1067,8 +1067,8 @@
                                                     <small class="text-info">
                                                         <i class="fas fa-info-circle"></i> Required: Work Items (Read) & Code (Read)
                                                     </small>
-                                                </div>
                                             </div>
+                                        </div>
                                             
                                             <div class="setup-step">
                                                 <div class="step-number">3</div>
@@ -1078,10 +1078,10 @@
                                                     <small class="text-success">
                                                         <i class="fas fa-check-circle"></i> Analytics will load automatically
                                                     </small>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        
+                                </div>
+                            </div>
+                        </div>
+
                                         <div class="mt-4 p-3" style="background: linear-gradient(135deg, #FFF4E6 0%, #FFF8F0 100%); border-radius: 8px; border-left: 4px solid var(--tr-orange);">
                                             <h6 style="color: var(--tr-dark-blue); margin-bottom: 8px;">
                                                 <i class="fas fa-lightbulb"></i> Quick Tip
@@ -1090,22 +1090,22 @@
                                                 Once configured, you'll have access to work item analytics, pull request insights, 
                                                 repository metrics, and comprehensive development dashboards.
                                             </p>
+                                    </div>
+                                    </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
 
                 <!-- Analytics Content (hidden initially) -->
                 <div id="analyticsContent" style="display: none;">
                 <div class="row mb-4">
-                    <div class="col-12">
+                            <div class="col-12">
                         <h2><i class="fas fa-tachometer-alt"></i> Analytics Overview</h2>
                         <p class="text-muted">GitHub Pull Requests, Azure DevOps & Figma Analytics</p>
+                        </div>
                     </div>
-                </div>
 
                 <!-- Navigation Tabs -->
                 <ul class="nav nav-tabs mb-4" id="analyticsTabs" role="tablist">
@@ -1203,6 +1203,7 @@
                             </div>
                         </div>
 
+
                     </div>
 
                     <!-- Figma Tab -->
@@ -1259,22 +1260,22 @@
                             <h5><i class="fas fa-cog fa-spin"></i> Datadog Configuration</h5>
                             <p><strong><i class="fas fa-globe"></i> Site:</strong> <span id="datadog-site">datadoghq.com</span></p>
                             <p><strong><i class="fas fa-check-circle"></i> Status:</strong> <span id="datadog-status">Ready</span></p>
-                        </div>
+    </div>
 
                         <!-- Log Search Controls -->
                         <div class="datadog-search-container">
                             <h5><i class="fas fa-search"></i> Log Search</h5>
-                            <div class="row">
+            <div class="row">
                                 <div class="col-md-10">
                                     <label for="datadog-query" class="form-label">Search Query</label>
                                     <input type="text" class="form-control" id="datadog-query" placeholder="Enter your search query (e.g., * for all logs, error, warning, etc.)" value="*">
                                     <small class="form-text text-muted">Use the sidebar configuration to set filters for service, level, time range, and limit.</small>
-                                </div>
+                        </div>
                                 <div class="col-md-2 d-flex align-items-end">
                                     <button class="btn btn-primary w-100" onclick="searchDatadogLogs()">
                                         <i class="fas fa-search"></i> Search Logs
-                                    </button>
-                                </div>
+                                </button>
+                            </div>
                             </div>
                             
                             <!-- Hidden filter elements for JavaScript functionality -->
@@ -1304,16 +1305,16 @@
                                     <option value="500">500</option>
                                     <option value="1000">1000</option>
                                 </select>
-                            </div>
-                        </div>
+                    </div>
+                </div>
 
                         <!-- Log Statistics -->
                         <div class="datadog-stats-container">
                             <h4><i class="fas fa-chart-bar"></i> Log Statistics</h4>
                             <div id="datadog-stats-container">
                                 <!-- Dynamic statistics will be loaded here -->
-                            </div>
                         </div>
+                            </div>
 
                         <!-- Logs Results -->
                         <div class="datadog-logs-container">
@@ -1341,6 +1342,36 @@
         let selectedMetrics = [];
         let currentTimeRange = 24;
         let currentChartType = 'line';
+        
+        // Azure DevOps Cache for fast repository sync
+        let azureDevOpsCache = {
+            data: null,
+            timestamp: null,
+            isValid: function() {
+                // Cache is valid for 5 minutes
+                return this.data && this.timestamp && (Date.now() - this.timestamp) < 300000;
+            },
+            set: function(data) {
+                this.data = data;
+                this.timestamp = Date.now();
+                console.log('🗄️ Azure DevOps data cached for fast sync');
+                // Update sync button status when cache is updated
+                setTimeout(() => updateSyncButtonStatus(), 100);
+            },
+            get: function() {
+                if (this.isValid()) {
+                    console.log('✅ Using cached Azure DevOps data');
+                    return this.data;
+                }
+                console.log('❌ Cache expired or empty');
+                return null;
+            },
+            clear: function() {
+                this.data = null;
+                this.timestamp = null;
+                console.log('🗑️ Azure DevOps cache cleared');
+            }
+        };
 
         // Welcome Modal Functions
         function showWelcomeModal() {
@@ -1607,6 +1638,9 @@
             checkFirstVisit();
             
             loadAvailableMetrics();
+            
+            // Update sync button status on page load
+            setTimeout(() => updateSyncButtonStatus(), 500);
             
             // Auto-select some default metrics for better user experience
             setTimeout(() => {
@@ -2020,31 +2054,48 @@
                 button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Syncing...';
                 button.disabled = true;
                 
-                // Get Azure DevOps configuration
-                const org = document.getElementById('azuredevops-org').value || azuredevopsOrg;
-                const project = document.getElementById('azuredevops-project').value || azuredevopsProject;
-                const areaPath = document.getElementById('azuredevops-area-path').value || azuredevopsAreaPath;
-                const days = document.getElementById('github-time-range').value || 30;
+                // First, try to use cached data from Azure DevOps tab
+                const cachedData = azureDevOpsCache.get();
+                let result = null;
                 
-                if (!org || !project) {
-                    alert('Please configure Azure DevOps organization and project first in the Azure DevOps tab.');
-                    return;
+                if (cachedData && cachedData.resolved_repositories) {
+                    console.log('🚀 Using cached Azure DevOps data for fast sync');
+                    // Use cached data - format it like the API response
+                    result = {
+                        status: 'success',
+                        repositories: cachedData.resolved_repositories,
+                        total_repositories: cachedData.resolved_repositories.length,
+                        source: 'cache',
+                        note: 'Data loaded from Azure DevOps tab cache'
+                    };
+                } else {
+                    console.log('⏳ No cache available, fetching from API...');
+                    // Fallback to API call if no cache available
+                    const org = document.getElementById('azuredevops-org').value;
+                    const project = document.getElementById('azuredevops-project').value;
+                    const areaPath = document.getElementById('azuredevops-area-path').value;
+                    const days = document.getElementById('github-time-range').value || 30;
+                    
+                    if (!org || !project) {
+                        alert('Please configure Azure DevOps organization and project first in the Azure DevOps tab, or load data in the Azure DevOps tab first.');
+                        return;
+                    }
+                    
+                    // Build API URL
+                    const params = new URLSearchParams({
+                        days: days,
+                        org: org,
+                        project: project
+                    });
+                    
+                    if (areaPath) {
+                        params.append('area_path', areaPath);
+                    }
+                    
+                    // Fetch repositories from Azure DevOps
+                    const response = await fetch(`/api/azuredevops/repositories?${params}`);
+                    result = await response.json();
                 }
-                
-                // Build API URL
-                const params = new URLSearchParams({
-                    days: days,
-                    org: org,
-                    project: project
-                });
-                
-                if (areaPath) {
-                    params.append('area_path', areaPath);
-                }
-                
-                // Fetch repositories from Azure DevOps
-                const response = await fetch(`/api/azuredevops/repositories?${params}`);
-                const result = await response.json();
                 
                 if (result.status === 'success' && result.repositories.length > 0) {
                     // Clear existing repositories
@@ -2081,8 +2132,11 @@
                         `✅ ${resolvedCount} repositories resolved to actual GitHub names\n` : '';
                     const unresolvedMessage = (addedCount - resolvedCount) > 0 ? 
                         `⚠️ ${addedCount - resolvedCount} repositories could not be resolved (using fallback names)\n` : '';
+                    const sourceMessage = result.source === 'cache' ? 
+                        `⚡ Data loaded instantly from Azure DevOps tab cache\n` : 
+                        `🔄 Data fetched from Azure DevOps API\n`;
                     
-                    alert(`🔗 Successfully synced ${addedCount} repositories from Azure DevOps!\n\n${resolvedMessage}${unresolvedMessage}\nRepositories added:\n${selectedRepos.join('\n')}`);
+                    alert(`🔗 Successfully synced ${addedCount} repositories from Azure DevOps!\n\n${sourceMessage}${resolvedMessage}${unresolvedMessage}\nRepositories added:\n${selectedRepos.join('\n')}`);
                     
                 } else if (result.repositories && result.repositories.length === 0) {
                     alert('No GitHub repositories found in Azure DevOps work items for the selected time range and area path.');
@@ -2553,6 +2607,9 @@
                 console.log(`⚡ Work items loaded in ${loadTime}ms`);
 
                 if (result.status === 'success') {
+                    // Cache the work items data (will be merged with PR data later)
+                    azureDevOpsCache.set(result.data);
+                    
                     displayAzureDevOpsSummary(result.data);
                     
                     // Update charts immediately with work items data
@@ -2600,6 +2657,9 @@
                 console.log(`⚡ Pull requests data loaded in ${loadTime}ms`);
 
                 if (result.status === 'success') {
+                    // Cache the Azure DevOps data for fast sync
+                    azureDevOpsCache.set(result.data);
+                    
                     // Update PR and commit cards with detailed data
                     updatePRAndCommitCards(result.data);
                     
@@ -2613,6 +2673,7 @@
                     
                     // Hide PR loading indicator
                     hidePRLoadingIndicator();
+                    
                     
                     console.log(`✅ PR data loaded: ${result.data.total_pull_requests || 0} PRs, ${result.data.total_commits || 0} commits`);
                     
@@ -3191,7 +3252,7 @@
                 container.appendChild(prDiv);
             });
         }
-        
+
         function displayRecentPRsAndCommits(prs, data) {
             console.log('🔄 Displaying recent PRs and commits:', { prs: prs.length, data });
             const container = document.getElementById('recent-azuredevops-prs-container');
@@ -3288,6 +3349,27 @@
                 `;
                 container.appendChild(itemDiv);
             });
+        }
+        
+        // Update sync button to show cache status
+        function updateSyncButtonStatus() {
+            const syncButton = document.getElementById('sync-azure-devops-btn');
+            if (!syncButton) return;
+            
+            const cachedData = azureDevOpsCache.get();
+            if (cachedData && cachedData.resolved_repositories) {
+                syncButton.innerHTML = `
+                    <i class="fab fa-microsoft"></i> <i class="fas fa-arrow-right"></i> <i class="fab fa-github"></i> 
+                    Sync from Azure DevOps <span class="badge bg-success ms-1">⚡ Fast</span>
+                `;
+                syncButton.title = 'Repositories available in cache - instant sync!';
+            } else {
+                syncButton.innerHTML = `
+                    <i class="fab fa-microsoft"></i> <i class="fas fa-arrow-right"></i> <i class="fab fa-github"></i> 
+                    Sync from Azure DevOps
+                `;
+                syncButton.title = 'Load data in Azure DevOps tab first for faster sync';
+            }
         }
         
 

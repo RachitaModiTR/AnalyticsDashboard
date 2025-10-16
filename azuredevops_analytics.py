@@ -978,6 +978,9 @@ class AzureDevOpsAnalytics:
             analytics['involved_repositories'] = [repo['github_repo'] for repo in resolved_repos if repo.get('github_repo')]
             analytics['resolved_repositories'] = resolved_repos  # Include full resolution data
             
+            # Add all work items with PR data for debug table
+            analytics['all_work_items_with_prs'] = work_items  # All work items with their PR associations
+            
             print(f"📊 Final Analytics Summary:")
             print(f"   - Work Items: {analytics['total_work_items']}")
             print(f"   - Pull Requests: {analytics['total_pull_requests']}")
@@ -985,6 +988,7 @@ class AzureDevOpsAnalytics:
             print(f"   - Repositories (raw): {len(all_repositories)}")
             print(f"   - Repositories (resolved): {analytics['total_repositories']}")
             print(f"   - Repository Names: {analytics['involved_repositories']}")
+            print(f"   - All work items with PRs: {len(analytics['all_work_items_with_prs'])}")
             
             return {
                 'status': 'success',
@@ -1646,6 +1650,7 @@ class AzureDevOpsAnalytics:
                     'work_items_by_assignee': {},  # Simplified for performance
                     'recent_work_items': recent_work_items,
                     'recent_pull_requests': recent_pull_requests,
+                    'all_work_items_with_prs': recent_work_items_for_pr_analysis,  # All work items with PR data for debug table
                     'repository_breakdown': repository_breakdown,
                     'involved_repositories': sorted(list(repositories)),
                     'resolved_repositories': resolved_repos,  # Include resolved repos for consistency

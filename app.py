@@ -25,7 +25,10 @@ chatbot_analytics = ChatbotAnalytics()
 @app.route('/')
 def index():
     """Main dashboard page"""
-    return render_template('index.html')
+    return render_template('index.html',
+                         api_key=Config.DD_API_KEY,
+                         application_key=Config.DD_APPLICATION_KEY,
+                         site=Config.DD_SITE)
 
 
 
@@ -275,7 +278,7 @@ def get_azuredevops_github_prs():
                 'status': 'error',
                 'message': 'Failed to fetch work items with GitHub PR analysis'
             }), 500
-        
+
         # Extract GitHub PR summary
         github_prs = []
         github_repos = set()
@@ -552,8 +555,8 @@ def test_azuredevops_connection():
                 'error': str(e)
             }
     
-    return jsonify({
-        'status': 'success',
+        return jsonify({
+            'status': 'success',
         'results': result
     })
 
@@ -1004,7 +1007,7 @@ def get_datadog_logs():
                 'status': 'error',
                 'message': 'Failed to fetch logs from Datadog'
             }), 500
-            
+
     except Exception as e:
         return jsonify({
             'status': 'error',
@@ -1037,7 +1040,7 @@ def get_datadog_log_stats():
                 'status': 'error',
                 'message': 'Failed to fetch log statistics from Datadog'
             }), 500
-            
+
     except Exception as e:
         return jsonify({
             'status': 'error',
@@ -1319,19 +1322,19 @@ def chatbot_analyze():
         else:
             response = chatbot_analytics.get_general_insights(context_data, question)
         
-        return jsonify({
-            'status': 'success',
+            return jsonify({
+                'status': 'success',
             'response': response,
             'data_source': data_source,
             'timestamp': datetime.now().isoformat()
-        })
+            })
         
     except Exception as e:
-        return jsonify({
-            'status': 'error',
+            return jsonify({
+                'status': 'error',
             'message': f'Analysis error: {str(e)}'
-        }), 500
-
+            }), 500
+            
 @app.route('/api/chatbot/summary/<data_source>', methods=['POST'])
 def chatbot_summary(data_source):
     """API endpoint for getting data summaries"""
