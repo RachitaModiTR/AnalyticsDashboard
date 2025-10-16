@@ -7,6 +7,7 @@ from datadog_analytics import DatadogApplicationKeyAnalytics
 from github_analytics import GitHubPullRequestAnalytics
 from azuredevops_analytics import AzureDevOpsAnalytics
 from figma_analytics import FigmaAnalytics
+from chatbot_analytics import ChatbotAnalytics
 
 # Load environment variables
 load_dotenv()
@@ -19,6 +20,7 @@ datadog_analytics = DatadogApplicationKeyAnalytics()
 github_analytics = GitHubPullRequestAnalytics()
 azuredevops_analytics = AzureDevOpsAnalytics()
 figma_analytics = FigmaAnalytics()
+chatbot_analytics = ChatbotAnalytics()
 
 @app.route('/')
 def index():
@@ -1471,6 +1473,130 @@ def create_repository_summary_table(data, repos):
     except Exception as e:
         print(f"Error creating repository summary table: {e}")
         return None
+
+# Chatbot API Routes
+@app.route('/api/chatbot/analyze', methods=['POST'])
+def chatbot_analyze():
+    """API endpoint for chatbot analysis"""
+    try:
+        data = request.get_json()
+        question = data.get('question', '')
+        data_source = data.get('data_source', 'general')
+        context_data = data.get('context_data', {})
+        
+        if not question:
+            return jsonify({
+                'status': 'error',
+                'message': 'Question is required'
+            }), 400
+        
+        # Route to appropriate analysis method based on data source
+        if data_source == 'datadog':
+            response = chatbot_analytics.analyze_datadog_metrics(context_data, question)
+        elif data_source == 'github':
+            response = chatbot_analytics.analyze_github_analytics(context_data, question)
+        elif data_source == 'azuredevops':
+            response = chatbot_analytics.analyze_azure_devops_data(context_data, question)
+        elif data_source == 'figma':
+            response = chatbot_analytics.analyze_figma_data(context_data, question)
+        else:
+            response = chatbot_analytics.get_general_insights(context_data, question)
+        
+        return jsonify({
+            'status': 'success',
+            'response': response,
+            'data_source': data_source,
+            'timestamp': datetime.now().isoformat()
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': f'Analysis error: {str(e)}'
+        }), 500
+
+@app.route('/api/chatbot/summary/<data_source>', methods=['POST'])
+def chatbot_summary(data_source):
+    """API endpoint for getting data summaries"""
+    try:
+        data = request.get_json()
+        context_data = data.get('context_data', {})
+        
+        if not context_data:
+            return jsonify({
+                'status': 'error',
+                'message': 'Context data is required'
+            }), 400
+        
+        response = chatbot_analytics.get_data_summary(data_source, context_data)
+        
+        return jsonify({
+            'status': 'success',
+            'summary': response,
+            'data_source': data_source,
+            'timestamp': datetime.now().isoformat()
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': f'Summary error: {str(e)}'
+        }), 500
+
+@app.route('/api/chatbot/suggest-questions/<data_source>', methods=['POST'])
+def chatbot_suggest_questions(data_source):
+    """API endpoint for getting suggested questions"""
+    try:
+        data = request.get_json()
+        available_data = data.get('available_data', {})
+        
+        questions = chatbot_analytics.suggest_questions(data_source, available_data)
+        
+        return jsonify({
+            'status': 'success',
+            'questions': questions,
+            'data_source': data_source,
+            'timestamp': datetime.now().isoformat()
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': f'Question suggestion error: {str(e)}'
+        }), 500
+
+@app.route('/api/chatbot/status')
+def chatbot_status():
+    """API endpoint to check chatbot configuration status"""
+    try:
+        # For Thomson Reuters integration, we don't need traditional API keys
+        thomson_reuters_configured = chatbot_analytics.llm_provider == 'openai'
+        
+        status = {
+            'llm_provider': chatbot_analytics.llm_provider,
+            'openai_configured': thomson_reuters_configured,  # Thomson Reuters integration
+            'anthropic_configured': bool(chatbot_analytics.anthropic_api_key),
+            'azure_configured': bool(chatbot_analytics.azure_openai_endpoint and 
+                                   chatbot_analytics.azure_openai_key and 
+                                   chatbot_analytics.azure_openai_deployment),
+            'thomson_reuters_configured': thomson_reuters_configured,
+            'ready': bool(thomson_reuters_configured or 
+                         chatbot_analytics.anthropic_api_key or 
+                         (chatbot_analytics.azure_openai_endpoint and 
+                          chatbot_analytics.azure_openai_key and 
+                          chatbot_analytics.azure_openai_deployment))
+        }
+        
+        return jsonify({
+            'status': 'success',
+            'data': status
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': f'Status check error: {str(e)}'
+        }), 500
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5002)

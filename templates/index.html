@@ -677,6 +677,8 @@
                 <!-- Azure DevOps Configuration -->
                 <div id="azuredevops-sidebar" style="display: block;">  <!-- Show by default since Azure DevOps is active tab -->
                     <h5><i class="fab fa-microsoft"></i> Azure DevOps Project Setup</h5>
+                <div id="azuredevops-sidebar" style="display: block;">  <!-- Show by default since Azure DevOps is active tab -->
+                    <h5><i class="fab fa-microsoft"></i> Azure DevOps Project Setup</h5>
                     
                     <div class="azuredevops-info">
                         <small><strong>Azure DevOps Integration:</strong> Work Items, Pull Requests & Builds</small><br>
@@ -711,6 +713,8 @@
                     <div class="metric-selector">
                         <h6>Time Range</h6>
                         <select class="form-select" id="azuredevops-time-range">
+                            <option value="7">Last 7 days</option>
+                            <option value="30" selected>Last 30 days</option>
                             <option value="7">Last 7 days</option>
                             <option value="30" selected>Last 30 days</option>
                             <option value="90">Last 90 days</option>
@@ -881,11 +885,13 @@
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="github-tab" data-bs-toggle="tab" data-bs-target="#github-pane" type="button" role="tab">
-                            <i class="fab fa-github"></i> GitHub Pull Requests
+                        <button class="nav-link" id="datadog-tab" data-bs-toggle="tab" data-bs-target="#datadog-pane" type="button" role="tab">
+                            <i class="fas fa-chart-line"></i> Datadog Metrics
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="datadog-logs-tab" data-bs-toggle="tab" data-bs-target="#datadog-logs-pane" type="button" role="tab">
+                            <i class="fas fa-file-alt"></i> Datadog Logs
                         <button class="nav-link" id="datadog-logs-tab" data-bs-toggle="tab" data-bs-target="#datadog-logs-pane" type="button" role="tab">
                             <i class="fas fa-file-alt"></i> Datadog Logs
                         </button>
@@ -900,6 +906,7 @@
                 <!-- Tab Content -->
                 <div class="tab-content" id="analyticsTabContent">
                     <!-- Datadog Tab -->
+                    <div class="tab-pane fade" id="datadog-pane" role="tabpanel">
                     <div class="tab-pane fade" id="datadog-pane" role="tabpanel">
 
                 <!-- Metrics Summary Cards -->
@@ -1104,6 +1111,7 @@
 
                     <!-- Azure DevOps Tab -->
                     <div class="tab-pane fade show active" id="azuredevops-pane" role="tabpanel">
+                    <div class="tab-pane fade show active" id="azuredevops-pane" role="tabpanel">
 
                         <!-- Azure DevOps Analytics Summary -->
                         <div class="row mb-4" id="azuredevops-summary">
@@ -1184,6 +1192,8 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Chatbot Tab Removed - Now using floating widget -->
                 </div>
             </div>
         </div>
@@ -1575,6 +1585,22 @@
                 githubSidebar.style.display = 'none';
                 azuredevopsSidebar.style.display = 'none';
                 figmaSidebar.style.display = 'block';
+            });
+            
+            // Show Azure DevOps sidebar by default since it's the active tab
+            azuredevopsSidebar.style.display = 'block';
+            datadogSidebar.style.display = 'none';
+            githubSidebar.style.display = 'none';
+            figmaSidebar.style.display = 'none';
+            
+            const chatbotTab = document.getElementById('chatbot-tab');
+            chatbotTab.addEventListener('click', function() {
+                datadogSidebar.style.display = 'none';
+                githubSidebar.style.display = 'none';
+                azuredevopsSidebar.style.display = 'none';
+                figmaSidebar.style.display = 'none';
+                // Initialize chatbot when tab is opened
+                initializeChatbot();
             });
             
             // Show Azure DevOps sidebar by default since it's the active tab
@@ -3811,6 +3837,681 @@
                 });
             }
         });
+
+        // Old chatbot functions removed - now using floating widget
+
+        function setupChatEventListeners() {
+            const sendBtn = document.getElementById('send-message-btn');
+            const chatInput = document.getElementById('chat-input');
+            
+            sendBtn.addEventListener('click', sendMessage);
+            chatInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+        }
+
+        async function sendMessage() {
+            const chatInput = document.getElementById('chat-input');
+            const dataSourceSelect = document.getElementById('data-source-select');
+            const question = chatInput.value.trim();
+            
+            if (!question) return;
+            
+            // Add user message to chat
+            addMessageToChat(question, 'user');
+            
+            // Clear input
+            chatInput.value = '';
+            
+            // Show typing indicator
+            const typingId = addTypingIndicator();
+            
+            try {
+                // Get current context data based on selected source
+                const contextData = await getCurrentContextData(dataSourceSelect.value);
+                
+                // Send to chatbot API
+                const response = await fetch('/api/chatbot/analyze', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        question: question,
+                        data_source: dataSourceSelect.value,
+                        context_data: contextData
+                    })
+                });
+                
+                const result = await response.json();
+                
+                // Remove typing indicator
+                removeTypingIndicator(typingId);
+                
+                if (result.status === 'success') {
+                    addMessageToChat(result.response, 'bot');
+                } else {
+                    addMessageToChat(`Error: ${result.message}`, 'bot', true);
+                }
+                
+            } catch (error) {
+                removeTypingIndicator(typingId);
+                addMessageToChat(`Error: ${error.message}`, 'bot', true);
+            }
+        }
+
+        function addMessageToChat(message, sender, isError = false) {
+            const chatMessages = document.getElementById('chat-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}-message`;
+            
+            const icon = sender === 'user' ? 'fas fa-user' : 'fas fa-robot';
+            const bgClass = isError ? 'bg-danger text-white' : (sender === 'user' ? 'bg-primary text-white' : 'bg-light');
+            const textClass = isError ? 'text-white' : '';
+            
+            messageDiv.innerHTML = `
+                <div class="d-flex align-items-start">
+                    <div class="flex-shrink-0">
+                        <i class="${icon} ${sender === 'user' ? 'text-primary' : 'text-primary'}"></i>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <div class="${bgClass} p-3 rounded">
+                            <strong>${sender === 'user' ? 'You' : 'AI Assistant'}:</strong> ${message}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function addTypingIndicator() {
+            const chatMessages = document.getElementById('chat-messages');
+            const typingDiv = document.createElement('div');
+            const typingId = 'typing-' + Date.now();
+            typingDiv.id = typingId;
+            typingDiv.className = 'message bot-message';
+            
+            typingDiv.innerHTML = `
+                <div class="d-flex align-items-start">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-robot text-primary"></i>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <div class="bg-light p-3 rounded">
+                            <strong>AI Assistant:</strong> <span class="typing-indicator">Thinking...</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            chatMessages.appendChild(typingDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            return typingId;
+        }
+
+        function removeTypingIndicator(typingId) {
+            const typingElement = document.getElementById(typingId);
+            if (typingElement) {
+                typingElement.remove();
+            }
+        }
+
+        async function getCurrentContextData(dataSource) {
+            try {
+                let contextData = {};
+                
+                switch (dataSource) {
+                    case 'datadog':
+                        // Get current Datadog data
+                        const datadogResponse = await fetch('/api/analytics?metrics=system.cpu.user&metrics=system.mem.used&hours=24');
+                        if (datadogResponse.ok) {
+                            const datadogData = await datadogResponse.json();
+                            contextData = datadogData.data || {};
+                        }
+                        break;
+                        
+                    case 'github':
+                        // Get current GitHub data
+                        const githubResponse = await fetch('/api/github/prs?days=30');
+                        if (githubResponse.ok) {
+                            const githubData = await githubResponse.json();
+                            contextData = githubData.data || {};
+                        }
+                        break;
+                        
+                    case 'azuredevops':
+                        // Get current Azure DevOps data
+                        const azureResponse = await fetch('/api/azuredevops/analytics?days=7&org=tr-tax&project=TaxProf');
+                        if (azureResponse.ok) {
+                            const azureData = await azureResponse.json();
+                            contextData = azureData.data || {};
+                        }
+                        break;
+                        
+                    case 'figma':
+                        // Get current Figma data
+                        const figmaResponse = await fetch('/api/figma/analytics?days=30');
+                        if (figmaResponse.ok) {
+                            const figmaData = await figmaResponse.json();
+                            contextData = figmaData.data || {};
+                        }
+                        break;
+                        
+                    default:
+                        // Get data from all sources
+                        const [datadogRes, githubRes, azureRes, figmaRes] = await Promise.allSettled([
+                            fetch('/api/analytics?metrics=system.cpu.user&metrics=system.mem.used&hours=24'),
+                            fetch('/api/github/prs?days=30'),
+                            fetch('/api/azuredevops/analytics?days=7&org=tr-tax&project=TaxProf'),
+                            fetch('/api/figma/analytics?days=30')
+                        ]);
+                        
+                        contextData = {
+                            datadog: datadogRes.status === 'fulfilled' ? (await datadogRes.value.json()).data : null,
+                            github: githubRes.status === 'fulfilled' ? (await githubRes.value.json()).data : null,
+                            azuredevops: azureRes.status === 'fulfilled' ? (await azureRes.value.json()).data : null,
+                            figma: figmaRes.status === 'fulfilled' ? (await figmaRes.value.json()).data : null
+                        };
+                        break;
+                }
+                
+                return contextData;
+                
+            } catch (error) {
+                console.error('Error getting context data:', error);
+                return {};
+            }
+        }
+
+        async function loadSuggestedQuestions() {
+            try {
+                const response = await fetch('/api/chatbot/suggest-questions/general', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        available_data: { sources: ['datadog', 'github', 'azuredevops', 'figma'] }
+                    })
+                });
+                
+                const result = await response.json();
+                const container = document.getElementById('suggested-questions');
+                
+                if (result.status === 'success' && result.questions) {
+                    container.innerHTML = '';
+                    result.questions.forEach(question => {
+                        const questionDiv = document.createElement('div');
+                        questionDiv.className = 'mb-2';
+                        questionDiv.innerHTML = `
+                            <button class="btn btn-outline-secondary btn-sm w-100 text-start" onclick="askQuestion('${question.replace(/'/g, "\\'")}')">
+                                <i class="fas fa-question-circle"></i> ${question}
+                            </button>
+                        `;
+                        container.appendChild(questionDiv);
+                    });
+                } else {
+                    container.innerHTML = '<div class="text-muted">No suggestions available</div>';
+                }
+                
+            } catch (error) {
+                console.error('Error loading suggested questions:', error);
+                document.getElementById('suggested-questions').innerHTML = '<div class="text-muted">Error loading suggestions</div>';
+            }
+        }
+
+        // Old askQuestion function removed - now using floating widget
+    </script>
+
+    <!-- Floating AI Assistant Widget -->
+    <div id="ai-assistant-widget" class="ai-widget">
+        <!-- Chat Toggle Button -->
+        <button id="ai-toggle-btn" class="ai-toggle-btn" title="AI Assistant">
+            <i class="fas fa-robot"></i>
+            <span class="ai-status-indicator" id="ai-status-indicator"></span>
+        </button>
+
+        <!-- Chat Panel -->
+        <div id="ai-chat-panel" class="ai-chat-panel">
+            <!-- Chat Header -->
+            <div class="ai-chat-header">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-robot text-primary me-2"></i>
+                    <strong>AI Assistant</strong>
+                    <span class="ai-status-badge ms-2" id="ai-status-badge">Ready</span>
+                </div>
+                <button id="ai-minimize-btn" class="btn btn-sm btn-outline-secondary">
+                    <i class="fas fa-minus"></i>
+                </button>
+            </div>
+
+            <!-- Chat Messages -->
+            <div id="ai-chat-messages" class="ai-chat-messages">
+                <div class="ai-message ai-bot-message">
+                    <div class="ai-message-content">
+                        <i class="fas fa-robot text-primary me-2"></i>
+                        <span>Hi! I can help analyze your analytics data. Ask me anything!</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="ai-quick-actions">
+                <button class="ai-quick-btn" onclick="askAIAssistant('Performance trends?')">
+                    <i class="fas fa-chart-line"></i> Trends
+                </button>
+                <button class="ai-quick-btn" onclick="askAIAssistant('Issues summary?')">
+                    <i class="fas fa-exclamation-triangle"></i> Issues
+                </button>
+                <button class="ai-quick-btn" onclick="askAIAssistant('Recent activity?')">
+                    <i class="fas fa-clock"></i> Recent
+                </button>
+            </div>
+
+            <!-- Chat Input -->
+            <div class="ai-chat-input">
+                <div class="input-group">
+                    <select class="form-select form-select-sm" id="ai-data-source" style="max-width: 100px;">
+                        <option value="general">All</option>
+                        <option value="datadog">Datadog</option>
+                        <option value="github">GitHub</option>
+                        <option value="azuredevops">Azure DevOps</option>
+                        <option value="figma">Figma</option>
+                    </select>
+                    <input type="text" class="form-control form-control-sm" id="ai-chat-input" placeholder="Ask about your data...">
+                    <button class="btn btn-primary btn-sm" type="button" id="ai-send-btn">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Widget Styles -->
+    <style>
+        .ai-widget {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        .ai-toggle-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            transition: all 0.3s ease;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .ai-toggle-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 25px rgba(0,0,0,0.2);
+        }
+
+        .ai-status-indicator {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #28a745;
+            border: 2px solid white;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .ai-chat-panel {
+            position: absolute;
+            bottom: 80px;
+            right: 0;
+            width: 420px;
+            height: 600px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            border: 1px solid #e9ecef;
+        }
+
+        .ai-chat-panel.show {
+            display: flex;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .ai-chat-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .ai-status-badge {
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.2);
+        }
+
+        .ai-chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #f8f9fa;
+        }
+
+        .ai-message {
+            margin-bottom: 16px;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .ai-bot-message {
+            justify-content: flex-start;
+        }
+
+        .ai-user-message {
+            justify-content: flex-end;
+        }
+
+        .ai-message-content {
+            max-width: 85%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 15px;
+            line-height: 1.5;
+            font-weight: 400;
+        }
+
+        .ai-bot-message .ai-message-content {
+            background: white;
+            border: 1px solid #e9ecef;
+            color: #333;
+        }
+
+        .ai-user-message .ai-message-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .ai-quick-actions {
+            padding: 10px 15px;
+            background: white;
+            border-top: 1px solid #e9ecef;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .ai-quick-btn {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 20px;
+            padding: 8px 14px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: #495057;
+            font-weight: 500;
+        }
+
+        .ai-quick-btn:hover {
+            background: #e9ecef;
+            border-color: #adb5bd;
+        }
+
+        .ai-chat-input {
+            padding: 18px;
+            background: white;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .ai-chat-input .form-control {
+            border-radius: 20px;
+            border: 1px solid #dee2e6;
+            font-size: 15px;
+            padding: 10px 15px;
+        }
+
+        .ai-chat-input .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+
+        .ai-chat-input .btn {
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .ai-chat-panel {
+                width: 350px;
+                height: 500px;
+            }
+            
+            .ai-widget {
+                bottom: 15px;
+                right: 15px;
+            }
+        }
+    </style>
+
+    <!-- AI Widget JavaScript -->
+    <script>
+        // AI Widget functionality
+        let aiWidgetOpen = false;
+        let aiInitialized = false;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeAIWidget();
+        });
+
+        function initializeAIWidget() {
+            const toggleBtn = document.getElementById('ai-toggle-btn');
+            const chatPanel = document.getElementById('ai-chat-panel');
+            const minimizeBtn = document.getElementById('ai-minimize-btn');
+            const sendBtn = document.getElementById('ai-send-btn');
+            const chatInput = document.getElementById('ai-chat-input');
+
+            // Toggle chat panel
+            toggleBtn.addEventListener('click', function() {
+                if (aiWidgetOpen) {
+                    closeAIChat();
+                } else {
+                    openAIChat();
+                }
+            });
+
+            // Minimize chat panel
+            minimizeBtn.addEventListener('click', function() {
+                closeAIChat();
+            });
+
+            // Send message
+            sendBtn.addEventListener('click', sendAIMessage);
+            chatInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendAIMessage();
+                }
+            });
+
+            // Initialize AI status
+            checkAIStatus();
+        }
+
+        function openAIChat() {
+            const chatPanel = document.getElementById('ai-chat-panel');
+            chatPanel.classList.add('show');
+            aiWidgetOpen = true;
+            
+            // Focus input
+            setTimeout(() => {
+                document.getElementById('ai-chat-input').focus();
+            }, 300);
+        }
+
+        function closeAIChat() {
+            const chatPanel = document.getElementById('ai-chat-panel');
+            chatPanel.classList.remove('show');
+            aiWidgetOpen = false;
+        }
+
+        function sendAIMessage() {
+            const input = document.getElementById('ai-chat-input');
+            const dataSource = document.getElementById('ai-data-source').value;
+            const message = input.value.trim();
+            
+            if (!message) return;
+
+            // Add user message
+            addAIMessage(message, 'user');
+            input.value = '';
+
+            // Show typing indicator
+            showAITyping();
+
+            // Send to backend
+            fetch('/api/chatbot/analyze', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    question: message,
+                    data_source: dataSource
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                hideAITyping();
+                if (data.status === 'success') {
+                    addAIMessage(data.response, 'bot');
+                } else {
+                    addAIMessage('Sorry, I encountered an error. Please try again.', 'bot');
+                }
+            })
+            .catch(error => {
+                hideAITyping();
+                addAIMessage('Sorry, I\'m having trouble connecting. Please try again.', 'bot');
+            });
+        }
+
+        function addAIMessage(content, type) {
+            const messagesContainer = document.getElementById('ai-chat-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `ai-message ai-${type}-message`;
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'ai-message-content';
+            
+            if (type === 'bot') {
+                contentDiv.innerHTML = `<i class="fas fa-robot text-primary me-2"></i>${content}`;
+            } else {
+                contentDiv.textContent = content;
+            }
+            
+            messageDiv.appendChild(contentDiv);
+            messagesContainer.appendChild(messageDiv);
+            
+            // Scroll to bottom
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function showAITyping() {
+            const messagesContainer = document.getElementById('ai-chat-messages');
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'ai-message ai-bot-message';
+            typingDiv.id = 'ai-typing-indicator';
+            
+            typingDiv.innerHTML = `
+                <div class="ai-message-content">
+                    <i class="fas fa-robot text-primary me-2"></i>
+                    <span class="typing-dots">
+                        <span>.</span><span>.</span><span>.</span>
+                    </span>
+                </div>
+            `;
+            
+            messagesContainer.appendChild(typingDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function hideAITyping() {
+            const typingIndicator = document.getElementById('ai-typing-indicator');
+            if (typingIndicator) {
+                typingIndicator.remove();
+            }
+        }
+
+        function askAIAssistant(question) {
+            if (!aiWidgetOpen) {
+                openAIChat();
+            }
+            document.getElementById('ai-chat-input').value = question;
+            sendAIMessage();
+        }
+
+        function checkAIStatus() {
+            fetch('/api/chatbot/status')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        const status = data.data;
+                        const indicator = document.getElementById('ai-status-indicator');
+                        const badge = document.getElementById('ai-status-badge');
+                        
+                        if (status.ready) {
+                            indicator.style.background = '#28a745';
+                            badge.textContent = 'Ready';
+                            badge.style.background = 'rgba(40, 167, 69, 0.2)';
+                        } else {
+                            indicator.style.background = '#ffc107';
+                            badge.textContent = 'Configuring...';
+                            badge.style.background = 'rgba(255, 193, 7, 0.2)';
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error checking AI status:', error);
+                });
+        }
     </script>
                 </div> <!-- End analyticsContent -->
             </div> <!-- End main-content -->
